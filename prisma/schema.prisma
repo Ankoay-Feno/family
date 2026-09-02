@@ -1,0 +1,210 @@
+// Schéma Prisma — SQLite en dev, PostgreSQL en prod (changer provider + DATABASE_URL).
+// SQLite ne supporte pas les enums Prisma : les champs `type`, `sex` et `role`
+// sont des String contraintes par le code applicatif.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Auth — tables requises par Better Auth 1.7 (vérifiées contre la définition
+// embarquée dans le paquet : voir getAuthTables).
+// ---------------------------------------------------------------------------
+
+model User {
+  id              String  @id
+  name            String
+  email           String  @unique
+  emailVerified   Boolean @default(false)
+  image           String?
+  // Admin de la plateforme : dashboard global, lecture seule de toutes les
+  // familles, création de familles et nomination des admins famille.
+  isPlatformAdmin Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
+
+  sessions     Session[]
+  accounts     Account[]
+  person       Person?
+  memberships  TreeMembership[]
+  joinRequests JoinRequest[]
+  proposals    Proposal[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  issuer                String
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @default(now()) @updatedAt
+
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  @@map("verification")
+}
+
+// ---------------------------------------------------------------------------
+// Domaine — l'arbre familial.
+// Un User est un compte ; une Person est une carte dans l'arbre. Une Person
+// peut exister sans compte (ancêtres, enfants) et être revendiquée plus tard.
+// ---------------------------------------------------------------------------
+
+model Tree {
+  id         String   @id @default(cuid())
+  name       String
+  inviteSlug String?  @unique // lien public de présentation pour les demandes d'adhésion
+  createdAt  DateTime @default(now())
+
+  persons       Person[]
+  relationships Relationship[]
+  memberships   TreeMembership[]
+  invitations   Invitation[]
+  joinRequests  JoinRequest[]
+  proposals     Proposal[]
+}
+
+model Person {
+  id        String   @id @default(cuid())
+  treeId    String
+  tree      Tree     @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  name      String
+  sex       String // "M" | "F"
+  birthYear Int?
+  deathYear Int?
+  photoUrl  String?
+  coverUrl  String? // photo de couverture — au plus une par carte
+  email     String? // contact de la personne — prérempli à l'invitation
+  userId    String?  @unique
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+
+  relsFrom    Relationship[] @relation("from")
+  relsTo      Relationship[] @relation("to")
+  invitations Invitation[]
+
+  @@index([treeId])
+}
+
+// PARENT : from = parent, to = enfant.
+// SPOUSE : paire non ordonnée (une seule ligne par couple).
+model Relationship {
+  id     String @id @default(cuid())
+  treeId String
+  tree   Tree   @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  type   String // "PARENT" | "SPOUSE"
+  fromId String
+  from   Person @relation("from", fields: [fromId], references: [id], onDelete: Cascade)
+  toId   String
+  to     Person @relation("to", fields: [toId], references: [id], onDelete: Cascade)
+
+  @@unique([type, fromId, toId])
+  @@index([treeId])
+}
+
+model TreeMembership {
+  id     String @id @default(cuid())
+  treeId String
+  tree   Tree   @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   String @default("member") // "admin" | "parent" | "member"
+
+  @@unique([treeId, userId])
+}
+
+// ---------------------------------------------------------------------------
+// V1.1 — entrées dans la famille et modération de l'arbre.
+// ---------------------------------------------------------------------------
+
+// Invitation ciblée : un lien à usage unique qui relie un nouveau compte
+// à une carte précise de l'arbre.
+model Invitation {
+  id        String    @id @default(cuid())
+  treeId    String
+  tree      Tree      @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  personId  String
+  person    Person    @relation(fields: [personId], references: [id], onDelete: Cascade)
+  token     String    @unique
+  role      String    @default("member") // rôle accordé à l'acceptation : "admin" | "parent" | "member"
+  createdBy String // userId de l'émetteur
+  createdAt DateTime  @default(now())
+  expiresAt DateTime
+  usedAt    DateTime?
+  usedBy    String? // userId du compte qui a accepté
+
+  @@index([treeId])
+}
+
+// Demande d'adhésion via le lien de présentation de la famille.
+model JoinRequest {
+  id        String    @id @default(cuid())
+  treeId    String
+  tree      Tree      @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   String
+  status    String    @default("PENDING") // "PENDING" | "APPROVED" | "REJECTED"
+  decidedBy String? // userId de l'admin décideur
+  decidedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@unique([treeId, userId])
+}
+
+// Proposition de modification de l'arbre par un membre, validée par un admin.
+model Proposal {
+  id        String    @id @default(cuid())
+  treeId    String
+  tree      Tree      @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  type      String // "ADD_MEMBER" (V1.1)
+  payload   String // JSON — pour ADD_MEMBER : { name, sex, birthYear, relType, anchorId }
+  status    String    @default("PENDING") // "PENDING" | "APPROVED" | "REJECTED"
+  reason    String? // motif de refus, visible par l'auteur
+  decidedBy String?
+  decidedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([treeId, status])
+}
