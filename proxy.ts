@@ -7,10 +7,13 @@ export function proxy(request: NextRequest) {
   const hasSessionCookie = request.cookies.has("better-auth.session_token");
   const { pathname } = request.nextUrl;
 
+  // Seul le renvoi optimiste vers /login est sûr : la présence du cookie ne
+  // prouve pas que la session est valide (elle peut avoir expiré ou disparu de
+  // la base). Renvoyer /login → / sur ce seul indice crée une boucle quand le
+  // cookie est périmé, car la page « / » revalide et repart vers /login. Le cas
+  // « déjà connecté qui visite /login » est traité côté page (session réelle).
   if (!hasSessionCookie && pathname === "/")
     return NextResponse.redirect(new URL("/login", request.url));
-  if (hasSessionCookie && pathname === "/login")
-    return NextResponse.redirect(new URL("/", request.url));
   return NextResponse.next();
 }
 
