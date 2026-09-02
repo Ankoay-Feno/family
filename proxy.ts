@@ -1,10 +1,18 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { getSessionCookie } from "better-auth/cookies";
 
 // Garde OPTIMISTE : simple présence du cookie de session, sans accès à la
 // base (le proxy tourne aussi sur les préchargements). La vérification
 // réelle de la session reste dans les pages et les server actions.
 export function proxy(request: NextRequest) {
-  const hasSessionCookie = request.cookies.has("better-auth.session_token");
+  // IMPORTANT : passer par getSessionCookie, pas par un nom en dur. En HTTPS
+  // (prod), Better Auth préfixe le cookie avec « __Secure- » ; chercher
+  // « better-auth.session_token » tel quel le rate en prod → le proxy croit
+  // l'utilisateur déconnecté et renvoie « / » vers /login, pendant que la page
+  // (qui, elle, lit bien le cookie) valide la session et repart vers « / ».
+  // getSessionCookie teste les deux noms (préfixé et non), donc marche en
+  // http (local) comme en https (prod).
+  const hasSessionCookie = getSessionCookie(request) !== null;
   const { pathname } = request.nextUrl;
 
   // Seul le renvoi optimiste vers /login est sûr : la présence du cookie ne
