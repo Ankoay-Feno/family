@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getSessionUser, isPlatformAdmin } from "@/lib/authz";
 import { countGenerations, type RelDTO } from "@/lib/family";
 import PlatformCreateFamily from "@/components/platform/PlatformCreateFamily";
+import PlatformFamilyActions from "@/components/platform/PlatformFamilyActions";
 
 export default async function PlatformPage() {
   const user = await getSessionUser();
@@ -84,6 +85,11 @@ export default async function PlatformPage() {
                     Consulter (lecture seule)
                   </Link>
                 </div>
+                <PlatformFamilyActions
+                  treeId={tree.id}
+                  treeName={tree.name}
+                  canRegenerate={tree.memberships.length === 0}
+                />
               </div>
             );
           })}

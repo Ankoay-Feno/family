@@ -81,6 +81,10 @@ body {
   border-color: var(--line);
   color: var(--ink);
 }
+.btn-danger {
+  background: var(--danger);
+  color: var(--accent-ink);
+}
 .btn-block {
   width: 100%;
 }
