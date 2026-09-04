@@ -374,6 +374,11 @@ body {
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
+.pnickname {
+  font-size: 11.5px;
+  color: var(--muted);
+  font-style: italic;
+}
 .you-chip {
   display: inline-block;
   margin-top: 2px;
@@ -423,6 +428,12 @@ body {
   font-size: 22px;
   line-height: 1.15;
   margin: 0;
+}
+.panel-nickname {
+  font-size: 13px;
+  color: var(--muted);
+  font-style: italic;
+  margin: 2px 0 0;
 }
 .rel-chip {
   display: inline-block;

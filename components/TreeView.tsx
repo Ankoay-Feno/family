@@ -14,6 +14,7 @@ import Avatar from "./Avatar";
 import AddMemberDialog from "./AddMemberDialog";
 import InviteButton from "./InviteButton";
 import PhotoUploader from "./PhotoUploader";
+import NicknameEditor from "./NicknameEditor";
 
 type Props = {
   treeId: string;
@@ -50,6 +51,7 @@ function PersonCard({
         {person.hasAccount && <span className="dot" title="Compte lié" />}
       </span>
       <span className="pname">{person.name}</span>
+      {person.nickname && <span className="pnickname">« {person.nickname} »</span>}
       {person.birthYear !== null && (
         <span className="pyear">
           {person.sex === "F" ? "née" : "né"} en {person.birthYear}
@@ -250,9 +252,21 @@ export default function TreeView({
               </span>
               <div>
                 <h2 className="panel-name display">{selected.name}</h2>
+                {selected.nickname && (
+                  <p className="panel-nickname">« {selected.nickname} »</p>
+                )}
                 {relLabel && <span className="rel-chip">{relLabel}</span>}
               </div>
             </div>
+            {!readOnly && (isAdmin || selected.id === youPersonId) && (
+              <div style={{ marginTop: 10 }}>
+                <NicknameEditor
+                  key={`n-${selected.id}`}
+                  personId={selected.id}
+                  nickname={selected.nickname}
+                />
+              </div>
+            )}
             <dl className="meta">
               {selected.birthYear !== null && (
                 <div>

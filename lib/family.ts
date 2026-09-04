@@ -5,6 +5,7 @@
 export type PersonDTO = {
   id: string;
   name: string;
+  nickname: string | null;
   sex: "M" | "F";
   birthYear: number | null;
   deathYear: number | null;

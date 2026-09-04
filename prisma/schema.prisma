@@ -108,6 +108,7 @@ model Person {
   treeId    String
   tree      Tree     @relation(fields: [treeId], references: [id], onDelete: Cascade)
   name      String
+  nickname  String? // surnom affiché sous le nom, sur la carte et sa fiche
   sex       String // "M" | "F"
   birthYear Int?
   deathYear Int?

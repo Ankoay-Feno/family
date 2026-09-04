@@ -4,6 +4,7 @@ import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { submitAddMember, type SubmitState } from "@/app/actions/proposals";
 import type { PersonDTO } from "@/lib/family";
+import { MAX_NICKNAME_LENGTH } from "@/lib/tree-edit";
 
 const initial: SubmitState = { ok: false };
 
@@ -60,6 +61,10 @@ export default function AddMemberDialog({
             <label className="field">
               <span>Nom</span>
               <input name="name" required placeholder="Voahangy" />
+            </label>
+            <label className="field">
+              <span>Surnom (facultatif)</span>
+              <input name="nickname" maxLength={MAX_NICKNAME_LENGTH} placeholder="Bebe" />
             </label>
             <div className="field">
               <span>Sexe</span>

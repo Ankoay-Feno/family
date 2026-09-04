@@ -6,9 +6,12 @@
 import { prisma } from "./prisma";
 import { spouseOf, type RelDTO } from "./family";
 
+export const MAX_NICKNAME_LENGTH = 40;
+
 export type AddMemberInput = {
   treeId: string;
   name: string;
+  nickname: string | null;
   sex: "M" | "F";
   birthYear: number | null;
   email: string | null;
@@ -24,12 +27,15 @@ export function parseAddMemberForm(
   const anchorId = String(formData.get("anchorId") ?? "");
   const relType = String(formData.get("relType") ?? "");
   const name = String(formData.get("name") ?? "").trim();
+  const nickname = String(formData.get("nickname") ?? "").trim() || null;
   const sex = String(formData.get("sex") ?? "");
   const birthRaw = String(formData.get("birthYear") ?? "").trim();
   const birthYear = birthRaw ? Number(birthRaw) : null;
   const email = String(formData.get("email") ?? "").trim() || null;
 
   if (!name) return { error: "Le nom est obligatoire." };
+  if (nickname !== null && nickname.length > MAX_NICKNAME_LENGTH)
+    return { error: `Le surnom ne doit pas dépasser ${MAX_NICKNAME_LENGTH} caractères.` };
   if (sex !== "M" && sex !== "F") return { error: "Le sexe est obligatoire." };
   if (birthYear !== null && (!Number.isInteger(birthYear) || birthYear < 1800 || birthYear > 2100))
     return { error: "Année de naissance invalide." };
@@ -38,7 +44,17 @@ export function parseAddMemberForm(
   if (!["CHILD_OF", "PARENT_OF", "SPOUSE_OF"].includes(relType))
     return { error: "Type de relation invalide." };
   return {
-    input: { treeId, anchorId, name, sex, birthYear, email, photoUrl: null, relType } as AddMemberInput,
+    input: {
+      treeId,
+      anchorId,
+      name,
+      nickname,
+      sex,
+      birthYear,
+      email,
+      photoUrl: null,
+      relType,
+    } as AddMemberInput,
   };
 }
 
@@ -84,6 +100,7 @@ export async function applyAddMember(
       data: {
         treeId: input.treeId,
         name: input.name,
+        nickname: input.nickname,
         sex: input.sex,
         birthYear: input.birthYear,
         email: input.email ?? null,

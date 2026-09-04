@@ -29,6 +29,7 @@ export default async function PlatformFamilyPage({
   const persons: PersonDTO[] = tree.persons.map((p) => ({
     id: p.id,
     name: p.name,
+    nickname: p.nickname,
     sex: p.sex as PersonDTO["sex"],
     birthYear: p.birthYear,
     deathYear: p.deathYear,
