@@ -136,6 +136,8 @@ export default function TreeView({
   const [dialogOpen, setDialogOpen] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
   const wiresRef = useRef<SVGSVGElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
 
   const selected = persons.find((p) => p.id === selectedId) ?? null;
   const family = selectedId ? directFamily(rels, selectedId) : null;
@@ -219,6 +221,32 @@ export default function TreeView({
     if (document.fonts?.ready) document.fonts.ready.then(draw);
   }, [draw]);
 
+  // Au chargement, quand l'arbre est plus large que l'écran (mobile) : on
+  // cadre horizontalement sur « vous », sinon sur le milieu de l'arbre.
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    if (!scroller || scroller.scrollWidth <= scroller.clientWidth) return;
+    const target = youPersonId
+      ? scroller.querySelector(`[data-avatar-id="${CSS.escape(youPersonId)}"]`)
+      : null;
+    if (target) {
+      const r = target.getBoundingClientRect();
+      const s = scroller.getBoundingClientRect();
+      scroller.scrollLeft += r.left + r.width / 2 - (s.left + s.width / 2);
+    } else {
+      scroller.scrollLeft = (scroller.scrollWidth - scroller.clientWidth) / 2;
+    }
+  }, [youPersonId]);
+
+  // En une colonne (tablette/mobile), le panneau est sous l'arbre : on l'amène
+  // à l'écran quand on touche une carte, sinon la sélection semble sans effet.
+  const select = useCallback((id: string) => {
+    setSelectedId(id);
+    if (window.matchMedia("(max-width: 980px)").matches) {
+      panelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, []);
+
   const relKey = selected ? relationLabel(persons, rels, youPersonId, selected.id) : null;
   const relLabel = relKey ? t.tree.relations[relKey] : "";
   const selectedSpouse = selected ? spouseOf(rels, selected.id) : null;
@@ -233,7 +261,7 @@ export default function TreeView({
             </button>
           </div>
         )}
-        <div className="tree-scroll">
+        <div className="tree-scroll" ref={scrollRef}>
           <div className="canvas" ref={canvasRef}>
             <svg className="wires" ref={wiresRef} aria-hidden="true" />
             {forest.map((unit) => (
@@ -243,14 +271,14 @@ export default function TreeView({
                 youPersonId={youPersonId}
                 selectedId={selectedId}
                 family={family}
-                onSelect={setSelectedId}
+                onSelect={select}
               />
             ))}
           </div>
         </div>
       </div>
 
-      <aside className="panel" aria-live="polite">
+      <aside className="panel" aria-live="polite" ref={panelRef}>
         {selected ? (
           <>
             {selected.coverUrl && (

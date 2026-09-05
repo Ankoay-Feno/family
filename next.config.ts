@@ -11,8 +11,9 @@ const nextConfig: NextConfig = {
     .filter(Boolean),
 
   experimental: {
-    // Les photos de carte passent par une server action (limite par défaut : 1 Mo).
-    serverActions: { bodySizeLimit: "4mb" },
+    // Les photos de carte (5 Mo max) peuvent passer par une server action
+    // (limite par défaut : 1 Mo) — marge pour l'enrobage multipart.
+    serverActions: { bodySizeLimit: "6mb" },
   },
 };
 

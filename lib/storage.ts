@@ -9,7 +9,7 @@ import { randomBytes } from "node:crypto";
 import { DeleteObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-export const PHOTO_MAX_BYTES = 3 * 1024 * 1024; // 3 Mo
+export const PHOTO_MAX_BYTES = 3 * 1024 * 1024; // 5 Mo
 export const PHOTO_TYPES: Record<string, string> = {
   "image/jpeg": ".jpg",
   "image/png": ".png",
