@@ -49,14 +49,14 @@ export default function DeceasedEditor({
 
   if (!editing) {
     return (
-      <button type="button" className="btn-link" style={{ fontSize: 12.5 }} onClick={open}>
-        {deceased ? t.deceased.edit : t.deceased.mark}
+      <button type="button" className="btn btn-ghost" onClick={open}>
+        † {deceased ? t.deceased.edit : t.deceased.mark}
       </button>
     );
   }
 
   return (
-    <span style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+    <span style={{ display: "flex", flexDirection: "column", gap: 6, flexBasis: "100%" }}>
       <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, cursor: "pointer" }}>
         <input
           type="checkbox"

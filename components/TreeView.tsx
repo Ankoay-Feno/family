@@ -308,16 +308,6 @@ export default function TreeView({
                 />
               </div>
             )}
-            {!readOnly && isAdmin && (
-              <div style={{ marginTop: 6 }}>
-                <DeceasedEditor
-                  key={`d-${selected.id}`}
-                  personId={selected.id}
-                  deceased={selected.deceased}
-                  deathYear={selected.deathYear}
-                />
-              </div>
-            )}
             <dl className="meta">
               {selected.birthYear !== null && (
                 <div>
@@ -373,6 +363,14 @@ export default function TreeView({
                   kind="cover"
                   hasPhoto={selected.coverUrl !== null}
                 />
+                {isAdmin && (
+                  <DeceasedEditor
+                    key={`d-${selected.id}`}
+                    personId={selected.id}
+                    deceased={selected.deceased}
+                    deathYear={selected.deathYear}
+                  />
+                )}
               </div>
             )}
             {!readOnly && isAdmin && !selected.hasAccount && (
