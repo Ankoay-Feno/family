@@ -3,6 +3,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser, isPlatformAdmin } from "@/lib/authz";
 import { countGenerations, type RelDTO } from "@/lib/family";
+import { getLocale } from "@/lib/i18n/server";
+import { formatLongDate, getDictionary } from "@/lib/i18n";
 import PlatformCreateFamily from "@/components/platform/PlatformCreateFamily";
 import PlatformFamilyActions from "@/components/platform/PlatformFamilyActions";
 
@@ -10,6 +12,8 @@ export default async function PlatformPage() {
   const user = await getSessionUser();
   if (!user) redirect("/login");
   if (!(await isPlatformAdmin(user.id))) redirect("/");
+  const locale = await getLocale();
+  const t = getDictionary(locale);
 
   const trees = await prisma.tree.findMany({
     orderBy: { createdAt: "asc" },
@@ -31,22 +35,19 @@ export default async function PlatformPage() {
     <>
       <header className="app-head">
         <div>
-          <div className="eyebrow">Administration de la plateforme</div>
-          <h1 className="display">Toutes les familles</h1>
+          <div className="eyebrow">{t.platform.eyebrow}</div>
+          <h1 className="display">{t.platform.title}</h1>
         </div>
         <div className="head-right">
           <Link href="/" className="btn-link">
-            ← Retour à l&apos;arbre
+            {t.nav.backToTree}
           </Link>
         </div>
       </header>
       <main className="admin-wrap">
         <section className="admin-section">
-          <h2 className="display">Familles ({trees.length})</h2>
-          <p className="hint">
-            Consultation en lecture seule ; la gestion des rôles se fait depuis la
-            fiche de chaque famille.
-          </p>
+          <h2 className="display">{t.platform.listSection.title(trees.length)}</h2>
+          <p className="hint">{t.platform.listSection.hint}</p>
           {trees.map((tree) => {
             const rels = tree.relationships.map((r) => ({
               ...r,
@@ -59,30 +60,30 @@ export default async function PlatformPage() {
             const linked = tree.persons.filter((p) => p.userId !== null).length;
             const pending =
               tree._count.proposals + tree._count.joinRequests + tree._count.invitations;
+            const admins = tree.memberships.filter((m) => m.role === "admin").length;
             return (
               <div key={tree.id} className="queue-item">
                 <div className="queue-head">
                   <span className="queue-title">{tree.name}</span>
                   <span className="queue-meta">
-                    créée le{" "}
-                    {tree.createdAt.toLocaleDateString("fr-FR", { dateStyle: "long" })}
+                    {t.platform.listSection.createdOn(formatLongDate(tree.createdAt, locale))}
                   </span>
                 </div>
                 <div className="queue-meta">
-                  {generations} génération{generations > 1 ? "s" : ""} ·{" "}
-                  {tree.persons.length} membre{tree.persons.length > 1 ? "s" : ""} ·{" "}
-                  {linked} compte{linked > 1 ? "s" : ""} lié{linked > 1 ? "s" : ""} ·{" "}
-                  {tree.memberships.filter((m) => m.role === "admin").length} admin
+                  {t.platform.listSection.stats(generations, tree.persons.length, linked, admins)}
                   {pending > 0 && (
                     <>
                       {" "}
-                      · <span className="badge badge-warm">{pending} en attente</span>
+                      ·{" "}
+                      <span className="badge badge-warm">
+                        {t.platform.listSection.pending(pending)}
+                      </span>
                     </>
                   )}
                 </div>
                 <div className="queue-actions">
                   <Link href={`/plateforme/famille/${tree.id}`} className="btn btn-ghost">
-                    Consulter (lecture seule)
+                    {t.platform.listSection.viewReadOnly}
                   </Link>
                 </div>
                 <PlatformFamilyActions
@@ -93,15 +94,12 @@ export default async function PlatformPage() {
               </div>
             );
           })}
-          {trees.length === 0 && <p className="empty">Aucune famille pour l&apos;instant.</p>}
+          {trees.length === 0 && <p className="empty">{t.platform.listSection.empty}</p>}
         </section>
 
         <section className="admin-section">
-          <h2 className="display">Créer une famille</h2>
-          <p className="hint">
-            La famille est créée avec la carte de son fondateur, et vous obtenez un
-            lien d&apos;invitation qui fera de lui l&apos;admin de la famille.
-          </p>
+          <h2 className="display">{t.platform.createSection.title}</h2>
+          <p className="hint">{t.platform.createSection.hint}</p>
           <PlatformCreateFamily />
         </section>
       </main>

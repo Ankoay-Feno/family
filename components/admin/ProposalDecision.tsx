@@ -3,10 +3,12 @@
 import { useActionState } from "react";
 import { approveProposal, rejectProposal } from "@/app/actions/proposals";
 import type { ActionState } from "@/app/actions";
+import { useI18n } from "@/components/I18nProvider";
 
 const initial: ActionState = { ok: false };
 
 export default function ProposalDecision({ proposalId }: { proposalId: string }) {
+  const { t } = useI18n();
   const [approveState, approveAction, approving] = useActionState(approveProposal, initial);
   const [rejectState, rejectAction, rejecting] = useActionState(rejectProposal, initial);
   const busy = approving || rejecting;
@@ -17,7 +19,7 @@ export default function ProposalDecision({ proposalId }: { proposalId: string })
         <form action={approveAction}>
           <input type="hidden" name="proposalId" value={proposalId} />
           <button type="submit" className="btn btn-primary" disabled={busy}>
-            {approving ? "Application…" : "Approuver"}
+            {approving ? t.admin.proposals.approving : t.admin.proposals.approve}
           </button>
         </form>
         <form action={rejectAction} className="queue-actions">
@@ -25,8 +27,8 @@ export default function ProposalDecision({ proposalId }: { proposalId: string })
           <input
             name="reason"
             maxLength={300}
-            placeholder="Motif (facultatif)"
-            aria-label="Motif de refus (facultatif)"
+            placeholder={t.admin.proposals.rejectReasonPlaceholder}
+            aria-label={t.admin.proposals.rejectReasonLabel}
             style={{
               width: 180,
               padding: "7px 10px",
@@ -39,7 +41,7 @@ export default function ProposalDecision({ proposalId }: { proposalId: string })
             }}
           />
           <button type="submit" className="btn btn-ghost" disabled={busy}>
-            {rejecting ? "Refus…" : "Refuser"}
+            {rejecting ? t.admin.proposals.rejecting : t.admin.proposals.reject}
           </button>
         </form>
       </div>

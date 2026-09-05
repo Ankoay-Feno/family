@@ -8,6 +8,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireMembership } from "@/lib/authz";
+import { getServerDictionary } from "@/lib/i18n/server";
 import {
   PHOTO_MAX_BYTES,
   PHOTO_TYPES,
@@ -22,11 +23,11 @@ export type PhotoKind = "profile" | "cover";
 export type PhotoState = { ok: boolean; error?: string };
 
 async function authorizePersonPhoto(personId: string) {
+  const t = await getServerDictionary();
   const person = await prisma.person.findUnique({ where: { id: personId } });
-  if (!person) throw new Error("Carte introuvable.");
+  if (!person) throw new Error(t.errors.personNotFound);
   const { user, isAdmin } = await requireMembership(person.treeId);
-  if (!isAdmin && person.userId !== user.id)
-    throw new Error("Vous ne pouvez modifier que les photos de votre propre carte.");
+  if (!isAdmin && person.userId !== user.id) throw new Error(t.errors.ownPhotoOnly);
   return person;
 }
 
@@ -42,13 +43,13 @@ export async function requestPhotoUpload(
 ): Promise<{ uploadUrl: string; publicUrl: string } | { error: string } | null> {
   try {
     await authorizePersonPhoto(personId);
-    if (!PHOTO_TYPES[contentType])
-      return { error: "Format non pris en charge (JPEG, PNG ou WebP)." };
-    if (size > PHOTO_MAX_BYTES) return { error: "La photo dépasse 3 Mo." };
+    const t = await getServerDictionary();
+    if (!PHOTO_TYPES[contentType]) return { error: t.errors.unsupportedPhotoFormat };
+    if (size > PHOTO_MAX_BYTES) return { error: t.errors.photoTooLarge };
     if (!isObjectStorageConfigured()) return null;
     return await presignPhotoUpload(contentType);
   } catch (e) {
-    return { error: e instanceof Error ? e.message : "Erreur inattendue." };
+    return { error: e instanceof Error ? e.message : (await getServerDictionary()).common.unexpectedError };
   }
 }
 
@@ -62,23 +63,23 @@ export async function setPersonPhoto(
   _prev: PhotoState,
   formData: FormData,
 ): Promise<PhotoState> {
+  const t = await getServerDictionary();
   try {
     const personId = String(formData.get("personId") ?? "");
     const kind = String(formData.get("kind") ?? "") as PhotoKind;
     if (kind !== "profile" && kind !== "cover")
-      return { ok: false, error: "Type de photo invalide." };
+      return { ok: false, error: t.errors.invalidPhotoKind };
 
     const person = await authorizePersonPhoto(personId);
 
     let url = String(formData.get("url") ?? "").trim() || null;
     if (url) {
-      if (!isOwnedPhotoUrl(url))
-        return { ok: false, error: "URL de photo non autorisée." };
+      if (!isOwnedPhotoUrl(url)) return { ok: false, error: t.errors.unauthorizedPhotoUrl };
     } else {
       const saved = await savePhoto(formData.get("photo"));
       if ("error" in saved) return { ok: false, error: saved.error };
       url = saved.url;
-      if (!url) return { ok: false, error: "Aucune photo reçue." };
+      if (!url) return { ok: false, error: t.errors.noPhotoReceived };
     }
 
     const previous = kind === "profile" ? person.photoUrl : person.coverUrl;
@@ -91,6 +92,6 @@ export async function setPersonPhoto(
     revalidatePath("/");
     return { ok: true };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Erreur inattendue." };
+    return { ok: false, error: e instanceof Error ? e.message : t.common.unexpectedError };
   }
 }

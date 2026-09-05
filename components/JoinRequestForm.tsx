@@ -2,6 +2,7 @@
 
 import { useActionState, type CSSProperties } from "react";
 import { submitJoinRequest, type JoinState } from "@/app/actions/join-requests";
+import { useI18n } from "./I18nProvider";
 
 const initial: JoinState = { ok: false };
 
@@ -25,15 +26,13 @@ export default function JoinRequestForm({
   slug: string;
   treeName: string;
 }) {
+  const { t } = useI18n();
   const [state, formAction, pending] = useActionState(submitJoinRequest, initial);
 
   if (state.ok) {
     return (
       <div className="login-card">
-        <p style={{ margin: 0 }}>
-          Votre demande a bien été envoyée aux admins de {treeName}. Elle sera
-          examinée prochainement — revenez plus tard pour voir l&apos;arbre.
-        </p>
+        <p style={{ margin: 0 }}>{t.join.sentNotice(treeName)}</p>
       </div>
     );
   }
@@ -42,18 +41,18 @@ export default function JoinRequestForm({
     <form className="login-card" action={formAction}>
       <input type="hidden" name="slug" value={slug} />
       <label className="field">
-        <span>Qui êtes-vous ?</span>
+        <span>{t.join.whoAreYou}</span>
         <textarea
           name="message"
           required
           maxLength={500}
-          placeholder="Je suis Faly, le fils de Lalao…"
+          placeholder={t.join.messagePlaceholder}
           style={textareaStyle}
         />
       </label>
       {state.error && <p className="form-error">{state.error}</p>}
       <button type="submit" className="btn btn-primary btn-block" disabled={pending}>
-        {pending ? "Envoi…" : "Envoyer ma demande"}
+        {pending ? t.join.sending : t.join.submit}
       </button>
     </form>
   );

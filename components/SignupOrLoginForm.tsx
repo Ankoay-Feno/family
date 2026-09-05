@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { useI18n } from "./I18nProvider";
 
 /**
  * Création de compte / connexion embarquée dans les pages publiques
@@ -16,6 +17,7 @@ export default function SignupOrLoginForm({
   defaultName?: string;
   defaultEmail?: string;
 }) {
+  const { t } = useI18n();
   const [mode, setMode] = useState<"signup" | "login">("signup");
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -44,8 +46,8 @@ export default function SignupOrLoginForm({
     if (result.error) {
       setError(
         result.error.message === "Invalid email or password"
-          ? "Email ou mot de passe incorrect."
-          : (result.error.message ?? "Une erreur est survenue. Réessayez."),
+          ? t.signup.invalidCredentials
+          : (result.error.message ?? t.signup.genericError),
       );
       return;
     }
@@ -53,7 +55,7 @@ export default function SignupOrLoginForm({
       // Pas de session automatique (autoSignIn: false) : on passe à l'étape
       // de connexion, sur place, avec l'email prérempli.
       setSavedEmail(email);
-      setNotice("Votre compte est créé — connectez-vous pour continuer.");
+      setNotice(t.signup.createdNotice);
       setMode("login");
       return;
     }
@@ -69,42 +71,48 @@ export default function SignupOrLoginForm({
       )}
       {mode === "signup" && (
         <label className="field">
-          <span>Votre nom</span>
+          <span>{t.signup.yourName}</span>
           <input name="name" required defaultValue={defaultName} autoComplete="name" />
         </label>
       )}
       <label className="field">
-        <span>Email</span>
+        <span>{t.signup.email}</span>
         <input name="email" type="email" required defaultValue={savedEmail} autoComplete="email" />
       </label>
       <label className="field">
-        <span>Mot de passe</span>
+        <span>{t.signup.password}</span>
         <input
           name="password"
           type="password"
           required
           minLength={8}
-          placeholder="8 caractères minimum"
+          placeholder={t.signup.passwordHint}
           autoComplete={mode === "signup" ? "new-password" : "current-password"}
         />
       </label>
       {error && <p className="form-error">{error}</p>}
       <button type="submit" className="btn btn-primary btn-block" disabled={pending}>
-        {pending ? "…" : mode === "signup" ? "Créer mon compte" : "Se connecter"}
+        {pending
+          ? mode === "signup"
+            ? t.signup.creating
+            : t.signup.loggingIn
+          : mode === "signup"
+            ? t.signup.createAccount
+            : t.signup.login}
       </button>
       <p style={{ fontSize: 12.5, color: "var(--muted)", textAlign: "center", margin: "12px 0 0" }}>
         {mode === "signup" ? (
           <>
-            Déjà un compte ?{" "}
+            {t.signup.alreadyAccountQuestion}{" "}
             <button type="button" className="btn-link" onClick={() => setMode("login")}>
-              Se connecter
+              {t.signup.switchToLogin}
             </button>
           </>
         ) : (
           <>
-            Pas encore de compte ?{" "}
+            {t.signup.noAccountQuestion}{" "}
             <button type="button" className="btn-link" onClick={() => setMode("signup")}>
-              Créer un compte
+              {t.signup.switchToSignup}
             </button>
           </>
         )}

@@ -2,8 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { useI18n } from "./I18nProvider";
 
 export default function SignOutButton() {
+  const { t } = useI18n();
   const router = useRouter();
   return (
     <button
@@ -15,7 +17,7 @@ export default function SignOutButton() {
         router.refresh();
       }}
     >
-      Se déconnecter
+      {t.nav.signOut}
     </button>
   );
 }

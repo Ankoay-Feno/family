@@ -5,8 +5,10 @@
 
 import { prisma } from "./prisma";
 import { spouseOf, type RelDTO } from "./family";
+import type { Dictionary } from "./i18n/dictionary";
+import { MAX_NICKNAME_LENGTH } from "./limits";
 
-export const MAX_NICKNAME_LENGTH = 40;
+export { MAX_NICKNAME_LENGTH };
 
 export type AddMemberInput = {
   treeId: string;
@@ -22,6 +24,7 @@ export type AddMemberInput = {
 
 export function parseAddMemberForm(
   formData: FormData,
+  t: Dictionary,
 ): { input: AddMemberInput } | { error: string } {
   const treeId = String(formData.get("treeId") ?? "");
   const anchorId = String(formData.get("anchorId") ?? "");
@@ -33,16 +36,16 @@ export function parseAddMemberForm(
   const birthYear = birthRaw ? Number(birthRaw) : null;
   const email = String(formData.get("email") ?? "").trim() || null;
 
-  if (!name) return { error: "Le nom est obligatoire." };
+  if (!name) return { error: t.errors.nameRequired };
   if (nickname !== null && nickname.length > MAX_NICKNAME_LENGTH)
-    return { error: `Le surnom ne doit pas dépasser ${MAX_NICKNAME_LENGTH} caractères.` };
-  if (sex !== "M" && sex !== "F") return { error: "Le sexe est obligatoire." };
+    return { error: t.errors.nicknameTooLong(MAX_NICKNAME_LENGTH) };
+  if (sex !== "M" && sex !== "F") return { error: t.errors.sexRequired };
   if (birthYear !== null && (!Number.isInteger(birthYear) || birthYear < 1800 || birthYear > 2100))
-    return { error: "Année de naissance invalide." };
+    return { error: t.errors.invalidBirthYear };
   if (email !== null && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-    return { error: "Email invalide." };
+    return { error: t.errors.invalidEmail };
   if (!["CHILD_OF", "PARENT_OF", "SPOUSE_OF"].includes(relType))
-    return { error: "Type de relation invalide." };
+    return { error: t.errors.invalidRelationType };
   return {
     input: {
       treeId,
@@ -67,20 +70,23 @@ async function loadRels(treeId: string): Promise<RelDTO[]> {
 }
 
 /** Valide contre l'état actuel de l'arbre. Retourne un message d'erreur ou null. */
-export async function validateAddMember(input: AddMemberInput): Promise<string | null> {
+export async function validateAddMember(
+  input: AddMemberInput,
+  t: Dictionary,
+): Promise<string | null> {
   const anchor = await prisma.person.findFirst({
     where: { id: input.anchorId, treeId: input.treeId },
   });
-  if (!anchor) return "Personne de référence introuvable.";
+  if (!anchor) return t.errors.anchorNotFound;
 
   const rels = await loadRels(input.treeId);
   if (input.relType === "SPOUSE_OF" && spouseOf(rels, input.anchorId))
-    return `${anchor.name} a déjà un conjoint dans l'arbre.`;
+    return t.errors.alreadyHasSpouse(anchor.name);
   if (input.relType === "PARENT_OF") {
     const parentCount = rels.filter(
       (r) => r.type === "PARENT" && r.toId === input.anchorId,
     ).length;
-    if (parentCount >= 2) return `${anchor.name} a déjà ses deux parents dans l'arbre.`;
+    if (parentCount >= 2) return t.errors.alreadyHasBothParents(anchor.name);
   }
   return null;
 }
@@ -131,13 +137,13 @@ export async function applyAddMember(
 }
 
 /** Description lisible d'un ajout, pour les files admin. Ex. : « Ajouter Faly (M, 1990) comme enfant de Lalao ». */
-export function describeAddMember(input: AddMemberInput, anchorName: string): string {
+export function describeAddMember(input: AddMemberInput, anchorName: string, t: Dictionary): string {
   const rel =
     input.relType === "CHILD_OF"
-      ? `comme enfant de ${anchorName}`
+      ? t.admin.proposals.relAsChildOf(anchorName)
       : input.relType === "PARENT_OF"
-        ? `comme parent de ${anchorName}`
-        : `comme conjoint·e de ${anchorName}`;
+        ? t.admin.proposals.relAsParentOf(anchorName)
+        : t.admin.proposals.relAsSpouseOf(anchorName);
   const details = [input.sex, input.birthYear].filter(Boolean).join(", ");
-  return `Ajouter ${input.name} (${details}) ${rel}`;
+  return t.admin.proposals.describeAdd(input.name, details, rel);
 }

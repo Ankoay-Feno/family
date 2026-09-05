@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Fraunces, Instrument_Sans } from "next/font/google";
+import { getLocale } from "@/lib/i18n/server";
+import I18nProvider from "@/components/I18nProvider";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -17,10 +20,18 @@ export const metadata: Metadata = {
   description: "L'arbre de la famille — comptes, photos et générations.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const locale = await getLocale();
   return (
-    <html lang="fr" className={`${fraunces.variable} ${instrumentSans.variable}`}>
-      <body>{children}</body>
+    <html lang={locale} className={`${fraunces.variable} ${instrumentSans.variable}`}>
+      <body>
+        <I18nProvider locale={locale}>
+          <div className="lang-switcher-slot">
+            <LanguageSwitcher />
+          </div>
+          {children}
+        </I18nProvider>
+      </body>
     </html>
   );
 }

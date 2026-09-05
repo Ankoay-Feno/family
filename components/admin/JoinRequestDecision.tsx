@@ -11,6 +11,7 @@ import {
   rejectJoinRequest,
   type JoinState,
 } from "@/app/actions/join-requests";
+import { useI18n } from "@/components/I18nProvider";
 
 const initial: JoinState = { ok: false };
 
@@ -34,6 +35,7 @@ export default function JoinRequestDecision({
   unlinkedPersons: PersonOption[];
   allPersons: PersonOption[];
 }) {
+  const { t } = useI18n();
   const [linkState, linkAction, linkPending] = useActionState(
     approveJoinRequestLink,
     initial,
@@ -51,11 +53,11 @@ export default function JoinRequestDecision({
     <div style={{ display: "grid", gap: 8 }}>
       {unlinkedPersons.length > 0 && (
         <details>
-          <summary style={summaryStyle}>Lier à une carte existante</summary>
+          <summary style={summaryStyle}>{t.admin.joinRequests.linkToExisting}</summary>
           <form action={linkAction} style={{ marginTop: 10 }}>
             <input type="hidden" name="requestId" value={requestId} />
             <label className="field">
-              <span>Carte sans compte</span>
+              <span>{t.admin.joinRequests.linkPersonLabel}</span>
               <select name="personId" defaultValue={unlinkedPersons[0]?.id}>
                 {unlinkedPersons.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -66,45 +68,45 @@ export default function JoinRequestDecision({
             </label>
             {linkState.error && <p className="form-error">{linkState.error}</p>}
             <button type="submit" className="btn btn-primary" disabled={linkPending}>
-              {linkPending ? "Approbation…" : "Approuver"}
+              {linkPending ? t.admin.joinRequests.approving : t.admin.joinRequests.approve}
             </button>
           </form>
         </details>
       )}
       <details>
-        <summary style={summaryStyle}>Créer sa carte</summary>
+        <summary style={summaryStyle}>{t.admin.joinRequests.createCard}</summary>
         <form action={createAction} style={{ marginTop: 10 }}>
           <input type="hidden" name="requestId" value={requestId} />
           <input type="hidden" name="treeId" value={treeId} />
           <label className="field">
-            <span>Nom</span>
+            <span>{t.admin.joinRequests.name}</span>
             <input name="name" required placeholder="Faly" />
           </label>
           <div className="field">
-            <span>Sexe</span>
+            <span>{t.admin.joinRequests.sex}</span>
             <div className="radio-row">
               <label>
-                <input type="radio" name="sex" value="F" required /> Femme
+                <input type="radio" name="sex" value="F" required /> {t.admin.joinRequests.woman}
               </label>
               <label>
-                <input type="radio" name="sex" value="M" /> Homme
+                <input type="radio" name="sex" value="M" /> {t.admin.joinRequests.man}
               </label>
             </div>
           </div>
           <label className="field">
-            <span>Année de naissance (facultatif)</span>
+            <span>{t.admin.joinRequests.birthYearOptional}</span>
             <input name="birthYear" type="number" min={1800} max={2100} placeholder="1990" />
           </label>
           <label className="field">
-            <span>Relation</span>
+            <span>{t.admin.joinRequests.relation}</span>
             <select name="relType" defaultValue="CHILD_OF">
-              <option value="CHILD_OF">Enfant de…</option>
-              <option value="PARENT_OF">Parent de…</option>
-              <option value="SPOUSE_OF">Conjoint·e de…</option>
+              <option value="CHILD_OF">{t.admin.joinRequests.relationChild}</option>
+              <option value="PARENT_OF">{t.admin.joinRequests.relationParent}</option>
+              <option value="SPOUSE_OF">{t.admin.joinRequests.relationSpouse}</option>
             </select>
           </label>
           <label className="field">
-            <span>Par rapport à</span>
+            <span>{t.admin.joinRequests.relativeTo}</span>
             <select name="anchorId" defaultValue={allPersons[0]?.id}>
               {allPersons.map((p) => (
                 <option key={p.id} value={p.id}>
@@ -115,7 +117,7 @@ export default function JoinRequestDecision({
           </label>
           {createState.error && <p className="form-error">{createState.error}</p>}
           <button type="submit" className="btn btn-primary" disabled={createPending}>
-            {createPending ? "Approbation…" : "Approuver"}
+            {createPending ? t.admin.joinRequests.approving : t.admin.joinRequests.approve}
           </button>
         </form>
       </details>
@@ -127,7 +129,7 @@ export default function JoinRequestDecision({
           </p>
         )}
         <button type="submit" className="btn btn-ghost" disabled={rejectPending}>
-          {rejectPending ? "Refus…" : "Refuser"}
+          {rejectPending ? t.admin.joinRequests.rejecting : t.admin.joinRequests.reject}
         </button>
       </form>
     </div>

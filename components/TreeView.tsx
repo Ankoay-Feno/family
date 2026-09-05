@@ -15,6 +15,7 @@ import AddMemberDialog from "./AddMemberDialog";
 import InviteButton from "./InviteButton";
 import PhotoUploader from "./PhotoUploader";
 import NicknameEditor from "./NicknameEditor";
+import { useI18n } from "./I18nProvider";
 
 type Props = {
   treeId: string;
@@ -39,6 +40,7 @@ function PersonCard({
   dimmed: boolean;
   onSelect: (id: string) => void;
 }) {
+  const { t } = useI18n();
   return (
     <button
       type="button"
@@ -48,16 +50,16 @@ function PersonCard({
     >
       <span className="avatar" data-avatar-id={person.id}>
         <Avatar person={person} />
-        {person.hasAccount && <span className="dot" title="Compte lié" />}
+        {person.hasAccount && <span className="dot" title={t.tree.panel.accountLinked} />}
       </span>
       <span className="pname">{person.name}</span>
       {person.nickname && <span className="pnickname">« {person.nickname} »</span>}
       {person.birthYear !== null && (
         <span className="pyear">
-          {person.sex === "F" ? "née" : "né"} en {person.birthYear}
+          {person.sex === "F" ? t.tree.bornF(person.birthYear) : t.tree.bornM(person.birthYear)}
         </span>
       )}
-      {isYou && <span className="you-chip">Vous</span>}
+      {isYou && <span className="you-chip">{t.tree.youChip}</span>}
     </button>
   );
 }
@@ -118,6 +120,7 @@ export default function TreeView({
   role = "member",
   readOnly = false,
 }: Props) {
+  const { t } = useI18n();
   const isAdmin = role === "admin";
   const forest = buildForest(persons, rels);
   const [selectedId, setSelectedId] = useState<string | null>(youPersonId);
@@ -207,7 +210,8 @@ export default function TreeView({
     if (document.fonts?.ready) document.fonts.ready.then(draw);
   }, [draw]);
 
-  const relLabel = selected ? relationLabel(persons, rels, youPersonId, selected.id) : "";
+  const relKey = selected ? relationLabel(persons, rels, youPersonId, selected.id) : null;
+  const relLabel = relKey ? t.tree.relations[relKey] : "";
   const selectedSpouse = selected ? spouseOf(rels, selected.id) : null;
 
   return (
@@ -216,7 +220,7 @@ export default function TreeView({
         {!readOnly && (
           <div className="tree-toolbar">
             <button type="button" className="btn btn-primary" onClick={() => setDialogOpen(true)}>
-              Ajouter un membre
+              {t.tree.addMember}
             </button>
           </div>
         )}
@@ -270,37 +274,40 @@ export default function TreeView({
             <dl className="meta">
               {selected.birthYear !== null && (
                 <div>
-                  <dt>Naissance</dt>
+                  <dt>{t.tree.panel.birth}</dt>
                   <dd>
-                    {selected.birthYear}
-                    {selected.deathYear === null &&
-                      ` · ${new Date().getFullYear() - selected.birthYear} ans`}
+                    {selected.deathYear === null
+                      ? t.tree.panel.birthWithAge(
+                          selected.birthYear,
+                          new Date().getFullYear() - selected.birthYear,
+                        )
+                      : selected.birthYear}
                   </dd>
                 </div>
               )}
               {selected.deathYear !== null && (
                 <div>
-                  <dt>Décès</dt>
+                  <dt>{t.tree.panel.death}</dt>
                   <dd>{selected.deathYear}</dd>
                 </div>
               )}
               <div>
-                <dt>Compte</dt>
+                <dt>{t.tree.panel.account}</dt>
                 {selected.hasAccount ? (
-                  <dd className="linked">Lié · actif</dd>
+                  <dd className="linked">{t.tree.panel.accountLinked}</dd>
                 ) : (
-                  <dd className="invite">Aucun — à inviter</dd>
+                  <dd className="invite">{t.tree.panel.accountNone}</dd>
                 )}
               </div>
               {selectedSpouse && (
                 <div>
-                  <dt>Conjoint·e</dt>
+                  <dt>{t.tree.panel.spouse}</dt>
                   <dd>{persons.find((p) => p.id === selectedSpouse)?.name}</dd>
                 </div>
               )}
               {selected.email && (
                 <div>
-                  <dt>Email</dt>
+                  <dt>{t.tree.panel.email}</dt>
                   <dd style={{ overflowWrap: "anywhere" }}>{selected.email}</dd>
                 </div>
               )}
@@ -332,9 +339,7 @@ export default function TreeView({
             )}
           </>
         ) : (
-          <p style={{ color: "var(--muted)", margin: 0 }}>
-            Cliquez sur un membre de l&apos;arbre pour voir sa fiche.
-          </p>
+          <p style={{ color: "var(--muted)", margin: 0 }}>{t.tree.emptySelection}</p>
         )}
       </aside>
 

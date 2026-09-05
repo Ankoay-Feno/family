@@ -4,6 +4,7 @@ import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin, requireUser } from "@/lib/authz";
+import { getServerDictionary } from "@/lib/i18n/server";
 
 export type InviteState = { ok: boolean; error?: string; path?: string };
 
@@ -20,11 +21,11 @@ export async function createInvitation(
   const treeId = String(formData.get("treeId") ?? "");
   const personId = String(formData.get("personId") ?? "");
   const { user } = await requireAdmin(treeId);
+  const t = await getServerDictionary();
 
   const person = await prisma.person.findFirst({ where: { id: personId, treeId } });
-  if (!person) return { ok: false, error: "Personne introuvable dans cette famille." };
-  if (person.userId)
-    return { ok: false, error: "Cette personne est déjà liée à un compte." };
+  if (!person) return { ok: false, error: t.errors.personNotFoundInFamily };
+  if (person.userId) return { ok: false, error: t.errors.personAlreadyLinked };
 
   const token = randomBytes(24).toString("base64url");
   await prisma.$transaction([
@@ -50,30 +51,22 @@ export async function acceptInvitation(
   formData: FormData,
 ): Promise<InviteState> {
   const user = await requireUser();
+  const t = await getServerDictionary();
   const token = String(formData.get("token") ?? "");
 
   const invitation = await prisma.invitation.findUnique({
     where: { token },
     include: { person: true, tree: true },
   });
-  if (!invitation)
-    return { ok: false, error: "Invitation introuvable ou révoquée." };
-  if (invitation.usedAt)
-    return { ok: false, error: "Cette invitation a déjà été utilisée." };
+  if (!invitation) return { ok: false, error: t.errors.invitationNotFound };
+  if (invitation.usedAt) return { ok: false, error: t.errors.invitationAlreadyUsed };
   if (invitation.expiresAt.getTime() < Date.now())
-    return {
-      ok: false,
-      error: "Cette invitation a expiré. Demandez un nouveau lien à un administrateur.",
-    };
+    return { ok: false, error: t.errors.invitationExpired };
   if (invitation.person.userId)
-    return { ok: false, error: "Cette carte est déjà liée à un autre compte." };
+    return { ok: false, error: t.errors.otherCardAlreadyLinked };
 
   const existing = await prisma.treeMembership.findFirst({ where: { userId: user.id } });
-  if (existing)
-    return {
-      ok: false,
-      error: "Un compte ne peut appartenir qu'à une seule famille pour l'instant.",
-    };
+  if (existing) return { ok: false, error: t.errors.onlyOneFamilyPerAccount };
 
   await prisma.$transaction([
     prisma.person.update({
@@ -102,12 +95,12 @@ export async function revokeInvitation(
   formData: FormData,
 ): Promise<InviteState> {
   const invitationId = String(formData.get("invitationId") ?? "");
+  const t = await getServerDictionary();
 
   const invitation = await prisma.invitation.findUnique({ where: { id: invitationId } });
-  if (!invitation) return { ok: false, error: "Invitation introuvable." };
+  if (!invitation) return { ok: false, error: t.errors.invitationNotFound };
   await requireAdmin(invitation.treeId);
-  if (invitation.usedAt)
-    return { ok: false, error: "Cette invitation a déjà été utilisée." };
+  if (invitation.usedAt) return { ok: false, error: t.errors.invitationAlreadyUsed };
 
   await prisma.invitation.delete({ where: { id: invitationId } });
 

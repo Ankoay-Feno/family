@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { setPersonNickname } from "@/app/actions/person";
-import { MAX_NICKNAME_LENGTH } from "@/lib/tree-edit";
+import { MAX_NICKNAME_LENGTH } from "@/lib/limits";
+import { useI18n } from "./I18nProvider";
 
 export default function NicknameEditor({
   personId,
@@ -12,6 +13,7 @@ export default function NicknameEditor({
   personId: string;
   nickname: string | null;
 }) {
+  const { t } = useI18n();
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(nickname ?? "");
   const [busy, setBusy] = useState(false);
@@ -27,7 +29,7 @@ export default function NicknameEditor({
     const result = await setPersonNickname({ ok: false }, data);
     setBusy(false);
     if (!result.ok) {
-      setError(result.error ?? "Erreur inattendue.");
+      setError(result.error ?? t.common.unexpectedError);
       return;
     }
     setEditing(false);
@@ -42,7 +44,7 @@ export default function NicknameEditor({
         style={{ fontSize: 12.5 }}
         onClick={() => setEditing(true)}
       >
-        {nickname ? "Modifier le surnom" : "Ajouter un surnom"}
+        {nickname ? t.nickname.edit : t.nickname.add}
       </button>
     );
   }
@@ -66,7 +68,7 @@ export default function NicknameEditor({
           }}
         />
         <button type="button" className="btn btn-ghost" disabled={busy} onClick={save}>
-          {busy ? "…" : "Enregistrer"}
+          {busy ? t.nickname.saving : t.nickname.save}
         </button>
         <button
           type="button"
@@ -78,7 +80,7 @@ export default function NicknameEditor({
             setError(null);
           }}
         >
-          Annuler
+          {t.common.cancel}
         </button>
       </span>
       {error && <span className="form-error" style={{ margin: 0 }}>{error}</span>}

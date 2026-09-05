@@ -7,14 +7,16 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requirePlatformAdmin } from "@/lib/authz";
 import { deletePhoto } from "@/lib/storage";
+import { getServerDictionary } from "@/lib/i18n/server";
+import type { Dictionary } from "@/lib/i18n";
 import type { ActionState } from "@/app/actions";
 
 export type CreateFamilyState = { ok: boolean; error?: string; path?: string };
 
 const THIRTY_DAYS_MS = 30 * 24 * 3600 * 1000;
 
-function errorMessage(e: unknown): string {
-  return e instanceof Error ? e.message : "Erreur inattendue.";
+function errorMessage(e: unknown, t: Dictionary): string {
+  return e instanceof Error ? e.message : t.common.unexpectedError;
 }
 
 /**
@@ -25,6 +27,7 @@ export async function createFamilyPlatform(
   _prev: CreateFamilyState,
   formData: FormData,
 ): Promise<CreateFamilyState> {
+  const t = await getServerDictionary();
   try {
     const admin = await requirePlatformAdmin();
 
@@ -35,11 +38,11 @@ export async function createFamilyPlatform(
     const birthYear = birthRaw ? Number(birthRaw) : null;
     const email = String(formData.get("email") ?? "").trim() || null;
 
-    if (!treeName) return { ok: false, error: "Le nom de la famille est obligatoire." };
-    if (!name) return { ok: false, error: "Le nom du fondateur est obligatoire." };
-    if (sex !== "M" && sex !== "F") return { ok: false, error: "Le sexe est obligatoire." };
+    if (!treeName) return { ok: false, error: t.errors.treeNameRequired };
+    if (!name) return { ok: false, error: t.errors.founderNameRequired };
+    if (sex !== "M" && sex !== "F") return { ok: false, error: t.errors.sexRequired };
     if (birthYear !== null && (!Number.isInteger(birthYear) || birthYear < 1800 || birthYear > 2100))
-      return { ok: false, error: "Année de naissance invalide." };
+      return { ok: false, error: t.errors.invalidBirthYear };
 
     const token = randomBytes(24).toString("base64url");
     const tree = await prisma.tree.create({
@@ -63,7 +66,7 @@ export async function createFamilyPlatform(
     revalidatePath("/plateforme");
     return { ok: true, path: `/invite/${token}` };
   } catch (e) {
-    return { ok: false, error: errorMessage(e) };
+    return { ok: false, error: errorMessage(e, t) };
   }
 }
 
@@ -76,6 +79,7 @@ export async function regenerateFounderInvitation(
   _prev: CreateFamilyState,
   formData: FormData,
 ): Promise<CreateFamilyState> {
+  const t = await getServerDictionary();
   try {
     const admin = await requirePlatformAdmin();
     const treeId = String(formData.get("treeId") ?? "");
@@ -87,14 +91,11 @@ export async function regenerateFounderInvitation(
         memberships: { select: { id: true } },
       },
     });
-    if (!tree) return { ok: false, error: "Famille introuvable." };
+    if (!tree) return { ok: false, error: t.errors.familyNotFound };
     if (tree.memberships.length > 0)
-      return {
-        ok: false,
-        error: "Le premier membre a déjà rejoint la famille ; gérez les invitations depuis sa fiche.",
-      };
+      return { ok: false, error: t.errors.founderAlreadyJoined };
     const founder = tree.persons[0];
-    if (!founder) return { ok: false, error: "Aucun fondateur pour cette famille." };
+    if (!founder) return { ok: false, error: t.errors.noFounder };
 
     const token = randomBytes(24).toString("base64url");
     await prisma.$transaction([
@@ -114,7 +115,7 @@ export async function regenerateFounderInvitation(
     revalidatePath("/plateforme");
     return { ok: true, path: `/invite/${token}` };
   } catch (e) {
-    return { ok: false, error: errorMessage(e) };
+    return { ok: false, error: errorMessage(e, t) };
   }
 }
 
@@ -127,6 +128,7 @@ export async function deleteFamilyPlatform(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  const t = await getServerDictionary();
   try {
     await requirePlatformAdmin();
     const treeId = String(formData.get("treeId") ?? "");
@@ -135,7 +137,7 @@ export async function deleteFamilyPlatform(
       where: { id: treeId },
       include: { persons: { select: { photoUrl: true, coverUrl: true } } },
     });
-    if (!tree) return { ok: false, error: "Famille introuvable." };
+    if (!tree) return { ok: false, error: t.errors.familyNotFound };
 
     for (const person of tree.persons) {
       await deletePhoto(person.photoUrl);
@@ -146,6 +148,6 @@ export async function deleteFamilyPlatform(
     revalidatePath("/plateforme");
     return { ok: true };
   } catch (e) {
-    return { ok: false, error: errorMessage(e) };
+    return { ok: false, error: errorMessage(e, t) };
   }
 }

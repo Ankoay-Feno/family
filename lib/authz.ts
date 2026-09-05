@@ -5,6 +5,7 @@
 import { headers } from "next/headers";
 import { auth } from "./auth";
 import { prisma } from "./prisma";
+import { getServerDictionary } from "./i18n/server";
 
 export async function getSessionUser() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -13,7 +14,7 @@ export async function getSessionUser() {
 
 export async function requireUser() {
   const user = await getSessionUser();
-  if (!user) throw new Error("Non connecté.");
+  if (!user) throw new Error((await getServerDictionary()).errors.notLoggedIn);
   return user;
 }
 
@@ -23,14 +24,14 @@ export async function requireMembership(treeId: string) {
   const membership = await prisma.treeMembership.findUnique({
     where: { treeId_userId: { treeId, userId: user.id } },
   });
-  if (!membership) throw new Error("Vous n'êtes pas membre de cette famille.");
+  if (!membership) throw new Error((await getServerDictionary()).errors.notMember);
   return { user, membership, isAdmin: membership.role === "admin" };
 }
 
 /** L'utilisateur courant doit être admin de l'arbre. */
 export async function requireAdmin(treeId: string) {
   const ctx = await requireMembership(treeId);
-  if (!ctx.isAdmin) throw new Error("Action réservée aux administrateurs.");
+  if (!ctx.isAdmin) throw new Error((await getServerDictionary()).errors.adminOnly);
   return ctx;
 }
 
@@ -47,6 +48,6 @@ export async function isPlatformAdmin(userId: string): Promise<boolean> {
 export async function requirePlatformAdmin() {
   const user = await requireUser();
   if (!(await isPlatformAdmin(user.id)))
-    throw new Error("Action réservée à l'administration de la plateforme.");
+    throw new Error((await getServerDictionary()).errors.platformAdminOnly);
   return user;
 }

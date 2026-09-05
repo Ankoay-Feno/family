@@ -5,6 +5,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/authz";
+import { getServerDictionary } from "@/lib/i18n/server";
 import JoinRequestForm from "@/components/JoinRequestForm";
 import SignupOrLoginForm from "@/components/SignupOrLoginForm";
 
@@ -15,16 +16,17 @@ export default async function RejoindrePage({
 }) {
   const { slug } = await params;
   const tree = await prisma.tree.findUnique({ where: { inviteSlug: slug } });
+  const t = await getServerDictionary();
 
   if (!tree) {
     return (
       <div className="login-wrap">
         <div className="login-brand">
-          <div className="eyebrow">Arbre familial</div>
-          <h1 className="display">Fianakaviana</h1>
+          <div className="eyebrow">{t.home.eyebrow}</div>
+          <h1 className="display">{t.common.appName}</h1>
         </div>
         <div className="login-card">
-          <p style={{ margin: 0 }}>Ce lien n&apos;est pas valide.</p>
+          <p style={{ margin: 0 }}>{t.join.invalidLink}</p>
         </div>
       </div>
     );
@@ -37,8 +39,7 @@ export default async function RejoindrePage({
     card = (
       <div className="login-card">
         <p style={{ margin: "0 0 14px", fontSize: 13, color: "var(--muted)" }}>
-          Créez votre compte (ou connectez-vous) pour envoyer votre demande
-          d&apos;adhésion :
+          {t.join.createAccountHint}
         </p>
         <SignupOrLoginForm />
       </div>
@@ -55,20 +56,16 @@ export default async function RejoindrePage({
     if (membership) {
       card = (
         <div className="login-card">
-          <p style={{ margin: "0 0 14px" }}>
-            Vous êtes déjà membre de cette famille.
-          </p>
+          <p style={{ margin: "0 0 14px" }}>{t.join.alreadyMember}</p>
           <Link href="/" className="btn btn-primary btn-block">
-            Voir l&apos;arbre
+            {t.join.viewTree}
           </Link>
         </div>
       );
     } else if (pending) {
       card = (
         <div className="login-card">
-          <p style={{ margin: 0 }}>
-            Votre demande est en attente de validation.
-          </p>
+          <p style={{ margin: 0 }}>{t.join.pendingReview}</p>
         </div>
       );
     } else {
@@ -79,7 +76,7 @@ export default async function RejoindrePage({
   return (
     <div className="login-wrap">
       <div className="login-brand">
-        <div className="eyebrow">Rejoindre la famille</div>
+        <div className="eyebrow">{t.join.eyebrow}</div>
         <h1 className="display">{tree.name}</h1>
       </div>
       {card}

@@ -1,6 +1,10 @@
 // Logique pure de l'arbre familial, partagée serveur/client.
 // Seules deux relations sont stockées (PARENT, SPOUSE) ; tout le reste
 // — générations, fratries, étiquettes de parenté — est calculé ici.
+// Le texte affiché n'est PAS ici : relationLabel() retourne une RelationKey
+// (voir lib/i18n/dictionary.ts), traduite par l'appelant via le dictionnaire.
+
+import type { RelationKey } from "./i18n/dictionary";
 
 export type PersonDTO = {
   id: string;
@@ -101,13 +105,13 @@ function ancestorDepths(rels: RelDTO[], id: string): Map<string, number> {
   return depths;
 }
 
-/** Étiquette du lien de sang entre root et target, ou null. */
+/** Clé du lien de sang entre root et target, ou null. */
 function bloodLabel(
   rels: RelDTO[],
   rootId: string,
   targetId: string,
   female: boolean,
-): string | null {
+): RelationKey | null {
   const a = ancestorDepths(rels, rootId);
   const b = ancestorDepths(rels, targetId);
   let best: [number, number] | null = null;
@@ -116,36 +120,41 @@ function bloodLabel(
     if (dv !== undefined && (!best || du + dv < best[0] + best[1])) best = [du, dv];
   }
   if (!best) return null;
-  const table: Record<string, [string, string]> = {
-    "1,0": ["Votre père", "Votre mère"],
-    "0,1": ["Votre fils", "Votre fille"],
-    "1,1": ["Votre frère", "Votre sœur"],
-    "2,0": ["Votre grand-père", "Votre grand-mère"],
-    "0,2": ["Votre petit-fils", "Votre petite-fille"],
-    "3,0": ["Votre arrière-grand-père", "Votre arrière-grand-mère"],
-    "0,3": ["Votre arrière-petit-fils", "Votre arrière-petite-fille"],
-    "2,1": ["Votre oncle", "Votre tante"],
-    "1,2": ["Votre neveu", "Votre nièce"],
-    "2,2": ["Votre cousin", "Votre cousine"],
+  const table: Record<string, [RelationKey, RelationKey]> = {
+    "1,0": ["father", "mother"],
+    "0,1": ["son", "daughter"],
+    "1,1": ["brother", "sister"],
+    "2,0": ["grandfather", "grandmother"],
+    "0,2": ["grandson", "granddaughter"],
+    "3,0": ["greatGrandfather", "greatGrandmother"],
+    "0,3": ["greatGrandson", "greatGranddaughter"],
+    "2,1": ["uncle", "aunt"],
+    "1,2": ["nephew", "niece"],
+    "2,2": ["cousinM", "cousinF"],
   };
   const entry = table[`${best[0]},${best[1]}`];
   return entry ? entry[female ? 1 : 0] : null;
 }
 
-/** Lien de parenté affiché, calculé à partir des seuls liens PARENT et SPOUSE. */
+const SIBLING_KEYS: RelationKey[] = ["brother", "sister"];
+const CHILD_KEYS: RelationKey[] = ["son", "daughter"];
+const PARENT_KEYS: RelationKey[] = ["father", "mother"];
+
+/** Clé du lien de parenté, calculée à partir des seuls liens PARENT et SPOUSE.
+ *  La mise en mots (fr/mg) vit dans le dictionnaire — voir dict.tree.relations. */
 export function relationLabel(
   persons: PersonDTO[],
   rels: RelDTO[],
   rootId: string | null,
   targetId: string,
-): string {
-  if (!rootId) return "";
-  if (targetId === rootId) return "Vous";
+): RelationKey | null {
+  if (!rootId) return null;
+  if (targetId === rootId) return "you";
   const target = persons.find((p) => p.id === targetId);
-  if (!target) return "";
+  if (!target) return null;
   const female = target.sex === "F";
 
-  if (spouseOf(rels, rootId) === targetId) return female ? "Votre épouse" : "Votre époux";
+  if (spouseOf(rels, rootId) === targetId) return female ? "wife" : "husband";
 
   const blood = bloodLabel(rels, rootId, targetId, female);
   if (blood) return blood;
@@ -154,20 +163,20 @@ export function relationLabel(
   const targetSpouse = spouseOf(rels, targetId);
   if (targetSpouse) {
     const viaSpouse = bloodLabel(rels, rootId, targetSpouse, !female);
-    if (viaSpouse?.includes("frère") || viaSpouse?.includes("sœur"))
-      return female ? "Votre belle-sœur" : "Votre beau-frère";
-    if (viaSpouse?.includes("fils") || viaSpouse?.includes("fille"))
-      return female ? "Votre belle-fille" : "Votre beau-fils";
+    if (viaSpouse && SIBLING_KEYS.includes(viaSpouse))
+      return female ? "sisterInLaw" : "brotherInLaw";
+    if (viaSpouse && CHILD_KEYS.includes(viaSpouse))
+      return female ? "daughterInLaw" : "sonInLaw";
   }
   const rootSpouse = spouseOf(rels, rootId);
   if (rootSpouse) {
     const viaRootSpouse = bloodLabel(rels, rootSpouse, targetId, female);
-    if (viaRootSpouse?.includes("père") || viaRootSpouse?.includes("mère"))
-      return female ? "Votre belle-mère" : "Votre beau-père";
-    if (viaRootSpouse?.includes("frère") || viaRootSpouse?.includes("sœur"))
-      return female ? "Votre belle-sœur" : "Votre beau-frère";
+    if (viaRootSpouse && PARENT_KEYS.includes(viaRootSpouse))
+      return female ? "motherInLaw" : "fatherInLaw";
+    if (viaRootSpouse && SIBLING_KEYS.includes(viaRootSpouse))
+      return female ? "sisterInLaw" : "brotherInLaw";
   }
-  return "Membre de la famille";
+  return "familyMember";
 }
 
 /** La famille directe (pour la mise en évidence au clic). */

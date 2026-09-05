@@ -14,12 +14,14 @@ import {
   type AddMemberInput,
 } from "@/lib/tree-edit";
 import { savePhoto } from "@/lib/upload";
+import { getServerDictionary } from "@/lib/i18n/server";
+import type { Dictionary } from "@/lib/i18n";
 import type { ActionState } from "@/app/actions";
 
 export type SubmitState = { ok: boolean; error?: string; applied?: boolean };
 
-function errorMessage(e: unknown): string {
-  return e instanceof Error ? e.message : "Erreur inattendue.";
+function errorMessage(e: unknown, t: Dictionary): string {
+  return e instanceof Error ? e.message : t.common.unexpectedError;
 }
 
 /**
@@ -30,8 +32,9 @@ export async function submitAddMember(
   _prev: SubmitState,
   formData: FormData,
 ): Promise<SubmitState> {
+  const t = await getServerDictionary();
   try {
-    const parsed = parseAddMemberForm(formData);
+    const parsed = parseAddMemberForm(formData, t);
     if ("error" in parsed) return { ok: false, error: parsed.error };
     const { input } = parsed;
 
@@ -45,7 +48,7 @@ export async function submitAddMember(
 
     // Les erreurs évidentes sont signalées tout de suite, même pour une
     // proposition — inutile de faire attendre l'auteur jusqu'à la validation.
-    const invalid = await validateAddMember(input);
+    const invalid = await validateAddMember(input, t);
     if (invalid) return { ok: false, error: invalid };
 
     // Rôle "parent" : application directe uniquement pour SES enfants —
@@ -82,7 +85,7 @@ export async function submitAddMember(
     revalidatePath("/admin");
     return { ok: true, applied: false };
   } catch (e) {
-    return { ok: false, error: errorMessage(e) };
+    return { ok: false, error: errorMessage(e, t) };
   }
 }
 
@@ -94,22 +97,21 @@ export async function approveProposal(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  const t = await getServerDictionary();
   try {
     const proposalId = String(formData.get("proposalId") ?? "");
     const proposal = await prisma.proposal.findUnique({ where: { id: proposalId } });
-    if (!proposal) return { ok: false, error: "Proposition introuvable." };
+    if (!proposal) return { ok: false, error: t.errors.proposalNotFound };
 
     const { user } = await requireAdmin(proposal.treeId);
 
-    if (proposal.status !== "PENDING")
-      return { ok: false, error: "Cette proposition a déjà été traitée." };
-    if (proposal.type !== "ADD_MEMBER")
-      return { ok: false, error: "Type de proposition inconnu." };
+    if (proposal.status !== "PENDING") return { ok: false, error: t.errors.proposalAlreadyHandled };
+    if (proposal.type !== "ADD_MEMBER") return { ok: false, error: t.errors.unknownProposalType };
 
     const input = JSON.parse(proposal.payload) as AddMemberInput;
-    const invalid = await validateAddMember(input);
+    const invalid = await validateAddMember(input, t);
     // Statut inchangé : l'admin garde la main et pourra refuser avec ce motif.
-    if (invalid) return { ok: false, error: "Impossible d'appliquer : " + invalid };
+    if (invalid) return { ok: false, error: t.errors.cannotApply(invalid) };
 
     await applyAddMember(input);
     await prisma.proposal.update({
@@ -121,7 +123,7 @@ export async function approveProposal(
     revalidatePath("/admin");
     return { ok: true };
   } catch (e) {
-    return { ok: false, error: errorMessage(e) };
+    return { ok: false, error: errorMessage(e, t) };
   }
 }
 
@@ -130,19 +132,18 @@ export async function rejectProposal(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  const t = await getServerDictionary();
   try {
     const proposalId = String(formData.get("proposalId") ?? "");
     const reason = String(formData.get("reason") ?? "").trim();
-    if (reason.length > 300)
-      return { ok: false, error: "Le motif ne doit pas dépasser 300 caractères." };
+    if (reason.length > 300) return { ok: false, error: t.errors.invalidReasonLength };
 
     const proposal = await prisma.proposal.findUnique({ where: { id: proposalId } });
-    if (!proposal) return { ok: false, error: "Proposition introuvable." };
+    if (!proposal) return { ok: false, error: t.errors.proposalNotFound };
 
     const { user } = await requireAdmin(proposal.treeId);
 
-    if (proposal.status !== "PENDING")
-      return { ok: false, error: "Cette proposition a déjà été traitée." };
+    if (proposal.status !== "PENDING") return { ok: false, error: t.errors.proposalAlreadyHandled };
 
     await prisma.proposal.update({
       where: { id: proposal.id },
@@ -157,6 +158,6 @@ export async function rejectProposal(
     revalidatePath("/admin");
     return { ok: true };
   } catch (e) {
-    return { ok: false, error: errorMessage(e) };
+    return { ok: false, error: errorMessage(e, t) };
   }
 }

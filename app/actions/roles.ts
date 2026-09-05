@@ -10,12 +10,14 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin, requirePlatformAdmin } from "@/lib/authz";
+import { getServerDictionary } from "@/lib/i18n/server";
+import type { Dictionary } from "@/lib/i18n";
 import type { ActionState } from "@/app/actions";
 
 const FAMILY_ROLES = ["admin", "parent", "member"] as const;
 
-function errorMessage(e: unknown): string {
-  return e instanceof Error ? e.message : "Erreur inattendue.";
+function errorMessage(e: unknown, t: Dictionary): string {
+  return e instanceof Error ? e.message : t.common.unexpectedError;
 }
 
 async function loadMembership(membershipId: string) {
@@ -25,13 +27,13 @@ async function loadMembership(membershipId: string) {
   });
 }
 
-async function assertNotLastAdmin(treeId: string, membershipId: string) {
+async function assertNotLastAdmin(treeId: string, membershipId: string, t: Dictionary) {
   const admins = await prisma.treeMembership.findMany({
     where: { treeId, role: "admin" },
     select: { id: true },
   });
   if (admins.length === 1 && admins[0].id === membershipId)
-    throw new Error("Impossible : la famille doit garder au moins un admin.");
+    throw new Error(t.errors.lastAdminRequired);
 }
 
 /** Admin famille : bascule member ↔ parent (jamais admin). */
@@ -39,27 +41,25 @@ export async function setFamilyRole(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  const t = await getServerDictionary();
   try {
     const membershipId = String(formData.get("membershipId") ?? "");
     const role = String(formData.get("role") ?? "");
     if (role !== "member" && role !== "parent")
-      return { ok: false, error: "Un admin famille ne peut donner que les rôles membre ou parent." };
+      return { ok: false, error: t.errors.limitedRoleGrant };
 
     const membership = await loadMembership(membershipId);
-    if (!membership) return { ok: false, error: "Membre introuvable." };
+    if (!membership) return { ok: false, error: t.errors.membershipNotFound };
     await requireAdmin(membership.treeId);
 
     if (membership.role === "admin")
-      return {
-        ok: false,
-        error: "Modifier un admin famille est réservé à l'administration de la plateforme.",
-      };
+      return { ok: false, error: t.errors.membershipEditAdminOnly };
 
     await prisma.treeMembership.update({ where: { id: membership.id }, data: { role } });
     revalidatePath("/admin");
     return { ok: true };
   } catch (e) {
-    return { ok: false, error: errorMessage(e) };
+    return { ok: false, error: errorMessage(e, t) };
   }
 }
 
@@ -68,23 +68,24 @@ export async function setRolePlatform(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  const t = await getServerDictionary();
   try {
     await requirePlatformAdmin();
     const membershipId = String(formData.get("membershipId") ?? "");
     const role = String(formData.get("role") ?? "");
     if (!FAMILY_ROLES.includes(role as (typeof FAMILY_ROLES)[number]))
-      return { ok: false, error: "Rôle invalide." };
+      return { ok: false, error: t.errors.invalidRole };
 
     const membership = await loadMembership(membershipId);
-    if (!membership) return { ok: false, error: "Membre introuvable." };
+    if (!membership) return { ok: false, error: t.errors.membershipNotFound };
     if (membership.role === "admin" && role !== "admin")
-      await assertNotLastAdmin(membership.treeId, membership.id);
+      await assertNotLastAdmin(membership.treeId, membership.id, t);
 
     await prisma.treeMembership.update({ where: { id: membership.id }, data: { role } });
     revalidatePath("/plateforme");
     revalidatePath(`/plateforme/famille/${membership.treeId}`);
     return { ok: true };
   } catch (e) {
-    return { ok: false, error: errorMessage(e) };
+    return { ok: false, error: errorMessage(e, t) };
   }
 }

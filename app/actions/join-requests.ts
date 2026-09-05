@@ -11,6 +11,8 @@ import {
   validateAddMember,
   applyAddMember,
 } from "@/lib/tree-edit";
+import { getServerDictionary } from "@/lib/i18n/server";
+import type { Dictionary } from "@/lib/i18n";
 
 export type JoinState = { ok: boolean; error?: string };
 
@@ -25,25 +27,24 @@ function message(e: unknown, fallback: string): string {
 /** Charge une demande PENDING et vérifie que l'utilisateur courant est admin
  *  de son arbre. Retourne { error } (message affichable) sinon — le champ
  *  `error` sert de discriminant (undefined en cas de succès). */
-async function loadPendingForAdmin(requestId: string) {
+async function loadPendingForAdmin(requestId: string, t: Dictionary) {
   const request = await prisma.joinRequest.findUnique({
     where: { id: requestId },
     include: { user: true },
   });
-  if (!request) return { error: "Demande introuvable." } as const;
+  if (!request) return { error: t.errors.requestNotFound } as const;
   let ctx;
   try {
     ctx = await requireAdmin(request.treeId);
   } catch (e) {
-    return { error: message(e, "Action réservée aux administrateurs.") } as const;
+    return { error: message(e, t.errors.adminOnly) } as const;
   }
   if (request.status !== "PENDING")
-    return { error: "Cette demande a déjà été traitée." } as const;
+    return { error: t.errors.requestAlreadyHandled } as const;
   const existing = await prisma.treeMembership.findFirst({
     where: { userId: request.userId },
   });
-  if (existing)
-    return { error: "Cette personne fait déjà partie d'une famille." } as const;
+  if (existing) return { error: t.errors.personAlreadyInFamily } as const;
   return { error: undefined, request, admin: ctx.user } as const;
 }
 
@@ -52,35 +53,34 @@ export async function submitJoinRequest(
   _prev: JoinState,
   formData: FormData,
 ): Promise<JoinState> {
+  const t = await getServerDictionary();
   let user;
   try {
     user = await requireUser();
   } catch (e) {
-    return fail(message(e, "Non connecté."));
+    return fail(message(e, t.errors.notLoggedIn));
   }
 
   const slug = String(formData.get("slug") ?? "");
   const msg = String(formData.get("message") ?? "").trim();
 
   const tree = await prisma.tree.findUnique({ where: { inviteSlug: slug } });
-  if (!tree) return fail("Ce lien n'est pas valide.");
+  if (!tree) return fail(t.errors.linkInvalid);
 
-  if (!msg) return fail("Le message est obligatoire.");
-  if (msg.length > 500)
-    return fail("Le message est trop long (500 caractères maximum).");
+  if (!msg) return fail(t.errors.messageRequired);
+  if (msg.length > 500) return fail(t.errors.messageTooLong);
 
   const membership = await prisma.treeMembership.findFirst({
     where: { userId: user.id },
   });
-  if (membership) return fail("Vous faites déjà partie d'une famille.");
+  if (membership) return fail(t.errors.alreadyInFamily);
 
   // @@unique([treeId, userId]) : une seule demande par personne et par arbre.
   // Une ancienne demande refusée est remplacée plutôt que dupliquée.
   const existing = await prisma.joinRequest.findUnique({
     where: { treeId_userId: { treeId: tree.id, userId: user.id } },
   });
-  if (existing?.status === "PENDING")
-    return fail("Votre demande est déjà en attente.");
+  if (existing?.status === "PENDING") return fail(t.errors.requestAlreadyPending);
   if (existing) {
     await prisma.joinRequest.update({
       where: { id: existing.id },
@@ -107,19 +107,19 @@ export async function approveJoinRequestLink(
   _prev: JoinState,
   formData: FormData,
 ): Promise<JoinState> {
+  const t = await getServerDictionary();
   const requestId = String(formData.get("requestId") ?? "");
   const personId = String(formData.get("personId") ?? "");
 
-  const loaded = await loadPendingForAdmin(requestId);
+  const loaded = await loadPendingForAdmin(requestId, t);
   if (loaded.error !== undefined) return fail(loaded.error);
   const { request, admin } = loaded;
 
   const person = await prisma.person.findFirst({
     where: { id: personId, treeId: request.treeId },
   });
-  if (!person) return fail("Carte introuvable dans cet arbre.");
-  if (person.userId)
-    return fail(`${person.name} est déjà lié·e à un compte.`);
+  if (!person) return fail(t.errors.cardNotFoundInTree);
+  if (person.userId) return fail(t.errors.personAlreadyLinkedNamed(person.name));
 
   await prisma.$transaction([
     prisma.person.update({
@@ -146,13 +146,14 @@ export async function approveJoinRequestCreate(
   _prev: JoinState,
   formData: FormData,
 ): Promise<JoinState> {
+  const t = await getServerDictionary();
   const requestId = String(formData.get("requestId") ?? "");
 
-  const loaded = await loadPendingForAdmin(requestId);
+  const loaded = await loadPendingForAdmin(requestId, t);
   if (loaded.error !== undefined) return fail(loaded.error);
   const { request, admin } = loaded;
 
-  const parsed = parseAddMemberForm(formData);
+  const parsed = parseAddMemberForm(formData, t);
   if ("error" in parsed) return fail(parsed.error);
   // On ne fait pas confiance au treeId du formulaire : c'est celui de la demande.
   // La carte créée hérite de l'email du compte du demandeur par défaut.
@@ -162,7 +163,7 @@ export async function approveJoinRequestCreate(
     email: parsed.input.email ?? request.user.email,
   };
 
-  const invalid = await validateAddMember(input);
+  const invalid = await validateAddMember(input, t);
   if (invalid) return fail(invalid);
 
   // Crée la carte déjà liée au compte du demandeur.
@@ -188,20 +189,20 @@ export async function rejectJoinRequest(
   _prev: JoinState,
   formData: FormData,
 ): Promise<JoinState> {
+  const t = await getServerDictionary();
   const requestId = String(formData.get("requestId") ?? "");
 
   const request = await prisma.joinRequest.findUnique({
     where: { id: requestId },
   });
-  if (!request) return fail("Demande introuvable.");
+  if (!request) return fail(t.errors.requestNotFound);
   let ctx;
   try {
     ctx = await requireAdmin(request.treeId);
   } catch (e) {
-    return fail(message(e, "Action réservée aux administrateurs."));
+    return fail(message(e, t.errors.adminOnly));
   }
-  if (request.status !== "PENDING")
-    return fail("Cette demande a déjà été traitée.");
+  if (request.status !== "PENDING") return fail(t.errors.requestAlreadyHandled);
 
   await prisma.joinRequest.update({
     where: { id: request.id },

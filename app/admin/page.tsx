@@ -8,10 +8,12 @@ import ProposalsSection from "@/components/admin/ProposalsSection";
 import JoinRequestsSection from "@/components/admin/JoinRequestsSection";
 import InvitationsSection from "@/components/admin/InvitationsSection";
 import MembersSection from "@/components/admin/MembersSection";
+import { getServerDictionary } from "@/lib/i18n/server";
 
 export default async function AdminPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
+  const t = await getServerDictionary();
 
   const membership = await prisma.treeMembership.findFirst({
     where: { userId: session.user.id },
@@ -31,22 +33,19 @@ export default async function AdminPage() {
     <>
       <header className="app-head">
         <div>
-          <div className="eyebrow">Administration</div>
+          <div className="eyebrow">{t.admin.eyebrow}</div>
           <h1 className="display">{tree.name}</h1>
         </div>
         <div className="head-right">
           <Link href="/" className="btn-link">
-            ← Retour à l&apos;arbre
+            {t.nav.backToTree}
           </Link>
         </div>
       </header>
       <main className="admin-wrap">
         <section className="admin-section">
-          <h2 className="display">Lien de présentation</h2>
-          <p className="hint">
-            Partagez ce lien (WhatsApp, SMS…) : la personne crée un compte puis envoie une
-            demande d&apos;adhésion que vous validerez ci-dessous.
-          </p>
+          <h2 className="display">{t.admin.presentationLink.title}</h2>
+          <p className="hint">{t.admin.presentationLink.hint}</p>
           <div className="link-box">
             <code>/rejoindre/{inviteSlug}</code>
           </div>

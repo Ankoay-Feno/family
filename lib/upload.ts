@@ -11,6 +11,7 @@ import {
   isObjectStorageConfigured,
   uploadPhotoBuffer,
 } from "./storage";
+import { getServerDictionary } from "./i18n/server";
 
 /**
  * Enregistre la photo si présente et valide. Retourne son URL publique,
@@ -22,9 +23,10 @@ export async function savePhoto(
   if (!value || typeof value === "string") return { url: null };
   const file = value;
   if (file.size === 0) return { url: null };
-  if (file.size > PHOTO_MAX_BYTES) return { error: "La photo dépasse 3 Mo." };
+  const t = await getServerDictionary();
+  if (file.size > PHOTO_MAX_BYTES) return { error: t.errors.photoTooLarge };
   const ext = PHOTO_TYPES[file.type];
-  if (!ext) return { error: "Format de photo non pris en charge (JPEG, PNG ou WebP)." };
+  if (!ext) return { error: t.errors.unsupportedPhotoFormat };
 
   const buffer = Buffer.from(await file.arrayBuffer());
 

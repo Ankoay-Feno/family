@@ -8,10 +8,12 @@ import TreeView from "@/components/TreeView";
 import CreateFamilyForm from "@/components/CreateFamilyForm";
 import SignOutButton from "@/components/SignOutButton";
 import PendingRequestNotice from "@/components/PendingRequestNotice";
+import { getServerDictionary } from "@/lib/i18n/server";
 
 export default async function HomePage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
+  const t = await getServerDictionary();
 
   const membership = await prisma.treeMembership.findFirst({
     where: { userId: session.user.id },
@@ -78,25 +80,21 @@ export default async function HomePage() {
     <>
       <header className="app-head">
         <div>
-          <div className="eyebrow">Arbre familial</div>
+          <div className="eyebrow">{t.home.eyebrow}</div>
           <h1 className="display">{tree.name}</h1>
         </div>
         <div className="head-right">
-          <div className="stats">
-            {generations} génération{generations > 1 ? "s" : ""} · {persons.length} membre
-            {persons.length > 1 ? "s" : ""} · {linked} compte{linked > 1 ? "s" : ""} lié
-            {linked > 1 ? "s" : ""}
-          </div>
+          <div className="stats">{t.home.stats(generations, persons.length, linked)}</div>
           <div className="userbox">
             <span>{session.user.name}</span>
             {platformAdmin && (
               <Link href="/plateforme" className="btn-link">
-                Plateforme
+                {t.nav.platform}
               </Link>
             )}
             {isAdmin && (
               <Link href="/admin" className="btn-link">
-                Administration
+                {t.nav.administration}
               </Link>
             )}
             <SignOutButton />
@@ -110,10 +108,7 @@ export default async function HomePage() {
         youPersonId={youPersonId}
         role={role}
       />
-      <footer className="app-foot">
-        Cliquez sur un membre pour voir sa fiche · « Ajouter un membre » pour agrandir
-        l&apos;arbre.
-      </footer>
+      <footer className="app-foot">{t.home.footer}</footer>
     </>
   );
 }

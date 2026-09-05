@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { requestPhotoUpload, setPersonPhoto, type PhotoKind } from "@/app/actions/photos";
+import { useI18n } from "./I18nProvider";
 
 /**
  * Bouton « Photo » / « Couverture » d'une carte.
@@ -19,6 +20,7 @@ export default function PhotoUploader({
   kind: PhotoKind;
   hasPhoto: boolean;
 }) {
+  const { t } = useI18n();
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +47,7 @@ export default function PhotoUploader({
           body: file,
         });
         if (!put.ok) {
-          setError("L'envoi vers le stockage a échoué. Réessayez.");
+          setError(t.photo.uploadFailed);
           return;
         }
         data.set("url", presign.publicUrl);
@@ -65,7 +67,14 @@ export default function PhotoUploader({
     }
   }
 
-  const label = kind === "profile" ? "photo" : "couverture";
+  const label =
+    kind === "profile"
+      ? hasPhoto
+        ? t.photo.changePhoto
+        : t.photo.addPhoto
+      : hasPhoto
+        ? t.photo.changeCover
+        : t.photo.addCover;
   return (
     <span style={{ display: "inline-flex", flexDirection: "column", gap: 4 }}>
       <button
@@ -74,7 +83,7 @@ export default function PhotoUploader({
         disabled={busy}
         onClick={() => inputRef.current?.click()}
       >
-        {busy ? "Envoi…" : `${hasPhoto ? "Changer la" : "Ajouter une"} ${label}`}
+        {busy ? t.photo.sending : label}
       </button>
       <input
         ref={inputRef}

@@ -5,6 +5,7 @@ import { getSessionUser, isPlatformAdmin } from "@/lib/authz";
 import { countGenerations, type PersonDTO, type RelDTO } from "@/lib/family";
 import TreeView from "@/components/TreeView";
 import MemberRoleRow from "@/components/platform/MemberRoleRow";
+import { getServerDictionary } from "@/lib/i18n/server";
 
 export default async function PlatformFamilyPage({
   params,
@@ -25,6 +26,7 @@ export default async function PlatformFamilyPage({
     },
   });
   if (!tree) redirect("/plateforme");
+  const t = await getServerDictionary();
 
   const persons: PersonDTO[] = tree.persons.map((p) => ({
     id: p.id,
@@ -55,29 +57,25 @@ export default async function PlatformFamilyPage({
     <>
       <header className="app-head">
         <div>
-          <div className="eyebrow">Plateforme · lecture seule</div>
+          <div className="eyebrow">{t.platform.familyDetail.eyebrow}</div>
           <h1 className="display">{tree.name}</h1>
         </div>
         <div className="head-right">
           <div className="stats">
-            {generations} génération{generations > 1 ? "s" : ""} · {persons.length} membre
-            {persons.length > 1 ? "s" : ""}
+            {t.platform.familyDetail.stats(generations, persons.length)}
           </div>
           <Link href="/plateforme" className="btn-link">
-            ← Toutes les familles
+            {t.platform.familyDetail.backToList}
           </Link>
         </div>
       </header>
       <TreeView treeId={tree.id} persons={persons} rels={rels} youPersonId={null} readOnly />
       <main className="admin-wrap" style={{ marginTop: 20 }}>
         <section className="admin-section">
-          <h2 className="display">Comptes et rôles</h2>
-          <p className="hint">
-            Seule la plateforme peut nommer ou retirer un admin famille ; il doit
-            toujours en rester au moins un.
-          </p>
+          <h2 className="display">{t.platform.familyDetail.accountsSection.title}</h2>
+          <p className="hint">{t.platform.familyDetail.accountsSection.hint}</p>
           {tree.memberships.length === 0 ? (
-            <p className="empty">Aucun compte lié à cette famille.</p>
+            <p className="empty">{t.platform.familyDetail.accountsSection.empty}</p>
           ) : (
             tree.memberships.map((m) => (
               <MemberRoleRow

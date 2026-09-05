@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { createInvitation, type InviteState } from "@/app/actions/invitations";
+import { useI18n } from "./I18nProvider";
 
 const initial: InviteState = { ok: false };
 
@@ -19,12 +20,13 @@ export default function InviteButton({
   personId: string;
   personName: string;
 }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
 
   return (
     <>
       <button type="button" className="btn btn-ghost" onClick={() => setOpen(true)}>
-        Inviter
+        {t.invite.button}
       </button>
       {open && (
         <InviteDialog
@@ -49,6 +51,7 @@ function InviteDialog({
   personName: string;
   onClose: () => void;
 }) {
+  const { t } = useI18n();
   const [state, formAction, pending] = useActionState(createInvitation, initial);
   const [copied, setCopied] = useState(false);
 
@@ -73,24 +76,23 @@ function InviteDialog({
         className="modal"
         role="dialog"
         aria-modal="true"
-        aria-label={`Inviter ${personName}`}
+        aria-label={t.invite.dialogTitle(personName)}
       >
-        <h2 className="display">Inviter {personName}</h2>
+        <h2 className="display">{t.invite.dialogTitle(personName)}</h2>
         {link ? (
           <>
             <p style={{ fontSize: 13, color: "var(--muted)", margin: "4px 0 10px" }}>
-              Envoyez ce lien à {personName} : il est valable 7 jours et ne peut
-              être utilisé qu&apos;une seule fois.
+              {t.invite.linkHint(personName)}
             </p>
             <div className="link-box">
               <code>{link}</code>
               <button type="button" className="btn btn-ghost" onClick={copy}>
-                {copied ? "Copié !" : "Copier"}
+                {copied ? t.common.copied : t.common.copy}
               </button>
             </div>
             <div className="modal-actions">
               <button type="button" className="btn btn-primary" onClick={onClose}>
-                Fermer
+                {t.common.close}
               </button>
             </div>
           </>
@@ -99,16 +101,15 @@ function InviteDialog({
             <input type="hidden" name="treeId" value={treeId} />
             <input type="hidden" name="personId" value={personId} />
             <p style={{ fontSize: 13, color: "var(--muted)", margin: "4px 0 10px" }}>
-              Génère un lien à usage unique (valable 7 jours) qui liera le compte
-              de {personName} à sa carte de l&apos;arbre.
+              {t.invite.generateHint(personName)}
             </p>
             {state.error && <p className="form-error">{state.error}</p>}
             <div className="modal-actions">
               <button type="button" className="btn btn-ghost" onClick={onClose}>
-                Annuler
+                {t.common.cancel}
               </button>
               <button type="submit" className="btn btn-primary" disabled={pending}>
-                {pending ? "Génération…" : "Générer le lien"}
+                {pending ? t.invite.generating : t.invite.generate}
               </button>
             </div>
           </form>

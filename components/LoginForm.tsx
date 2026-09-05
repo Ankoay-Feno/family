@@ -3,11 +3,13 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { useI18n } from "./I18nProvider";
 
 // Connexion uniquement : la création de compte se fait exclusivement via un
 // lien d'invitation (/invite/…) ou le lien de présentation d'une famille
 // (/rejoindre/…), pour qu'aucun compte n'existe hors d'un parcours d'entrée.
 export default function LoginForm() {
+  const { t } = useI18n();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const router = useRouter();
@@ -25,8 +27,8 @@ export default function LoginForm() {
     if (result.error) {
       setError(
         result.error.message === "Invalid email or password"
-          ? "Email ou mot de passe incorrect."
-          : (result.error.message ?? "Une erreur est survenue. Réessayez."),
+          ? t.login.invalidCredentials
+          : (result.error.message ?? t.login.genericError),
       );
       return;
     }
@@ -37,14 +39,14 @@ export default function LoginForm() {
   return (
     <div className="login-wrap">
       <div className="login-brand">
-        <div className="eyebrow">Arbre familial</div>
-        <h1 className="display">Fianakaviana</h1>
+        <div className="eyebrow">{t.login.eyebrow}</div>
+        <h1 className="display">{t.common.appName}</h1>
       </div>
       {/* method="post" : si le JS n'est pas encore chargé, une soumission
           native ne doit jamais envoyer le mot de passe en clair dans l'URL. */}
       <form className="login-card" method="post" onSubmit={onSubmit}>
         <label className="field">
-          <span>Email</span>
+          <span>{t.login.email}</span>
           <input
             name="email"
             type="email"
@@ -54,25 +56,22 @@ export default function LoginForm() {
           />
         </label>
         <label className="field">
-          <span>Mot de passe</span>
+          <span>{t.login.password}</span>
           <input
             name="password"
             type="password"
             required
             minLength={8}
-            placeholder="8 caractères minimum"
+            placeholder={t.login.passwordHint}
             autoComplete="current-password"
           />
         </label>
         {error && <p className="form-error">{error}</p>}
         <button type="submit" className="btn btn-primary btn-block" disabled={pending}>
-          {pending ? "…" : "Se connecter"}
+          {pending ? t.login.submitPending : t.login.submit}
         </button>
       </form>
-      <p className="login-note">
-        Pas encore de compte ? Il se crée depuis le lien d&apos;invitation ou le
-        lien de présentation que votre famille vous a envoyé.
-      </p>
+      <p className="login-note">{t.login.note}</p>
     </div>
   );
 }

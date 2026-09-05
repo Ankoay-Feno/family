@@ -57,6 +57,18 @@ body {
   font-weight: 500;
 }
 
+.lang-switcher-slot {
+  position: fixed;
+  top: 12px;
+  right: 14px;
+  z-index: 30;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
 /* ---------- boutons ---------- */
 
 .btn {

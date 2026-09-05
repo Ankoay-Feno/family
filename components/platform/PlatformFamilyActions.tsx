@@ -7,6 +7,7 @@ import {
   type CreateFamilyState,
 } from "@/app/actions/platform";
 import type { ActionState } from "@/app/actions";
+import { useI18n } from "@/components/I18nProvider";
 
 const inviteInitial: CreateFamilyState = { ok: false };
 const deleteInitial: ActionState = { ok: false };
@@ -20,6 +21,7 @@ export default function PlatformFamilyActions({
   treeName: string;
   canRegenerate: boolean;
 }) {
+  const { t } = useI18n();
   const [inviteState, inviteAction, invitePending] = useActionState(
     regenerateFounderInvitation,
     inviteInitial,
@@ -44,7 +46,7 @@ export default function PlatformFamilyActions({
               setCopied(true);
             }}
           >
-            {copied ? "Copié !" : "Copier"}
+            {copied ? t.common.copied : t.common.copy}
           </button>
         </div>
       )}
@@ -53,16 +55,18 @@ export default function PlatformFamilyActions({
           <form action={inviteAction}>
             <input type="hidden" name="treeId" value={treeId} />
             <button type="submit" className="btn btn-ghost" disabled={invitePending}>
-              {invitePending ? "…" : "Régénérer l'invitation"}
+              {invitePending
+                ? t.platform.familyActions.regenerating
+                : t.platform.familyActions.regenerate}
             </button>
           </form>
         )}
         {confirming ? (
           <form action={deleteAction} className="queue-actions">
             <input type="hidden" name="treeId" value={treeId} />
-            <span className="queue-meta">Supprimer « {treeName} » définitivement ?</span>
+            <span className="queue-meta">{t.platform.familyActions.confirmDelete(treeName)}</span>
             <button type="submit" className="btn btn-danger" disabled={deletePending}>
-              {deletePending ? "Suppression…" : "Confirmer"}
+              {deletePending ? t.platform.familyActions.deleting : t.platform.familyActions.confirm}
             </button>
             <button
               type="button"
@@ -70,12 +74,12 @@ export default function PlatformFamilyActions({
               onClick={() => setConfirming(false)}
               disabled={deletePending}
             >
-              Annuler
+              {t.platform.familyActions.cancel}
             </button>
           </form>
         ) : (
           <button type="button" className="btn btn-ghost" onClick={() => setConfirming(true)}>
-            Supprimer la famille
+            {t.platform.familyActions.deleteFamily}
           </button>
         )}
       </div>

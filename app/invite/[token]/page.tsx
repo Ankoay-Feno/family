@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/authz";
+import { getServerDictionary } from "@/lib/i18n/server";
+import type { Dictionary } from "@/lib/i18n";
 import AcceptInviteButton from "@/components/AcceptInviteButton";
 import SignupOrLoginForm from "@/components/SignupOrLoginForm";
 
@@ -18,6 +20,7 @@ export default async function InvitePage({
 }) {
   const { token } = await params;
   const user = await getSessionUser();
+  const t = await getServerDictionary();
 
   const invitation = await prisma.invitation.findUnique({
     where: { token },
@@ -27,12 +30,9 @@ export default async function InvitePage({
   if (!invitation) {
     if (user) redirect("/");
     return (
-      <Shell>
-        <p>
-          Ce lien d&apos;invitation est invalide ou a été révoqué. Demandez un
-          nouveau lien à un administrateur de votre famille.
-        </p>
-        <LoginLink />
+      <Shell t={t}>
+        <p>{t.invitePage.invalidOrRevoked}</p>
+        <LoginLink t={t} />
       </Shell>
     );
   }
@@ -42,12 +42,9 @@ export default async function InvitePage({
     // (email rouvert, onglet gardé) — pas une erreur, on ramène vers l'app.
     if (user) redirect("/");
     return (
-      <Shell>
-        <p>
-          Cette invitation a déjà été utilisée : la carte de{" "}
-          <strong>{invitation.person.name}</strong> est déjà liée à un compte.
-        </p>
-        <LoginLink />
+      <Shell t={t}>
+        <p>{t.invitePage.alreadyUsed(invitation.person.name)}</p>
+        <LoginLink t={t} />
       </Shell>
     );
   }
@@ -55,30 +52,21 @@ export default async function InvitePage({
   if (isExpired(invitation.expiresAt)) {
     if (user) redirect("/");
     return (
-      <Shell>
-        <p>
-          Cette invitation a expiré. Demandez un nouveau lien à un administrateur
-          de la famille «&nbsp;{invitation.tree.name}&nbsp;».
-        </p>
-        <LoginLink />
+      <Shell t={t}>
+        <p>{t.invitePage.expired(invitation.tree.name)}</p>
+        <LoginLink t={t} />
       </Shell>
     );
   }
 
   return (
-    <Shell>
-      <p>
-        La famille «&nbsp;<strong>{invitation.tree.name}</strong>&nbsp;» vous
-        invite à devenir «&nbsp;<strong>{invitation.person.name}</strong>&nbsp;»
-        dans son arbre généalogique.
-      </p>
+    <Shell t={t}>
+      <p>{t.invitePage.offer(invitation.tree.name, invitation.person.name)}</p>
       {user ? (
         <AcceptInviteButton token={invitation.token} />
       ) : (
         <>
-          <p style={{ fontSize: 13, color: "var(--muted)" }}>
-            Créez votre compte (ou connectez-vous) pour accepter :
-          </p>
+          <p style={{ fontSize: 13, color: "var(--muted)" }}>{t.invitePage.createAccountHint}</p>
           <SignupOrLoginForm
             defaultName={invitation.person.name}
             defaultEmail={invitation.person.email ?? ""}
@@ -89,20 +77,20 @@ export default async function InvitePage({
   );
 }
 
-function LoginLink() {
+function LoginLink({ t }: { t: Dictionary }) {
   return (
     <Link href="/login" className="btn btn-primary btn-block" style={{ marginTop: 14 }}>
-      Se connecter
+      {t.invitePage.login}
     </Link>
   );
 }
 
-function Shell({ children }: { children: ReactNode }) {
+function Shell({ t, children }: { t: Dictionary; children: ReactNode }) {
   return (
     <div className="login-wrap">
       <div className="login-brand">
-        <div className="eyebrow">Invitation</div>
-        <h1 className="display">Fianakaviana</h1>
+        <div className="eyebrow">{t.invitePage.eyebrow}</div>
+        <h1 className="display">{t.common.appName}</h1>
       </div>
       <div className="login-card">{children}</div>
     </div>
