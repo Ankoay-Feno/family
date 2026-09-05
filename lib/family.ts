@@ -74,11 +74,27 @@ export function buildForest(persons: PersonDTO[], rels: RelDTO[]): Unit[] {
     return { members: spouse ? [person, spouse] : [person], children };
   }
 
+  const hasKnownParents = (id: string) => parentsOf(rels, id).length > 0;
+
+  // Un couple ne démarre la forêt (racine) que si AUCUN des deux conjoints
+  // n'a de parents connus ailleurs dans l'arbre. Sinon le couple doit être
+  // rattaché comme enfant lors de la construction depuis ce parent — sans ce
+  // garde-fou, le conjoint « libre » (ex. Vololona, sans parents connus) est
+  // traité comme racine en premier et absorbe son conjoint (ex. Jean jacque),
+  // qui devient « déjà placé » avant que son propre parent (ex. Rakotonihary)
+  // ne soit traité : ce parent perd alors silencieusement ce lien de sang
+  // (aucune ligne dessinée, le couple apparaît comme un arbre séparé).
+  const isRootCandidate = (p: PersonDTO) => {
+    if (hasKnownParents(p.id)) return false;
+    const spouseId = spouseOf(rels, p.id);
+    return !spouseId || !hasKnownParents(spouseId);
+  };
+
   // Boucle (et non .filter().map()) : `placed` se remplit au fil des unités
   // construites, sinon un conjoint sans parents serait affiché deux fois.
   const roots: Unit[] = [];
   const candidates = persons
-    .filter((p) => parentsOf(rels, p.id).length === 0)
+    .filter(isRootCandidate)
     .sort((a, b) => (a.birthYear ?? 9999) - (b.birthYear ?? 9999));
   for (const p of candidates) {
     if (!placed.has(p.id)) roots.push(buildUnit(p.id));
