@@ -55,6 +55,10 @@ export type Dictionary = {
   languageSwitcher: {
     label: string;
   };
+  profileMenu: {
+    openLabel: string;
+    title: string;
+  };
   nav: {
     platform: string;
     administration: string;
@@ -158,6 +162,7 @@ export type Dictionary = {
     changePhoto: string;
     addCover: string;
     changeCover: string;
+    takePhoto: string;
     sending: string;
     uploadFailed: string;
   };

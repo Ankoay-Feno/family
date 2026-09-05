@@ -14,6 +14,10 @@ export const fr: Dictionary = {
   languageSwitcher: {
     label: "Changer de langue",
   },
+  profileMenu: {
+    openLabel: "Ouvrir le menu profil",
+    title: "Mon profil",
+  },
   nav: {
     platform: "Plateforme",
     administration: "Administration",
@@ -154,6 +158,7 @@ export const fr: Dictionary = {
     changePhoto: "Changer la photo",
     addCover: "Ajouter une couverture",
     changeCover: "Changer la couverture",
+    takePhoto: "Prendre une photo",
     sending: "Envoi…",
     uploadFailed: "L'envoi vers le stockage a échoué. Réessayez.",
   },

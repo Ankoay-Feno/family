@@ -14,6 +14,10 @@ export const mg: Dictionary = {
   languageSwitcher: {
     label: "Ovay ny fiteny",
   },
+  profileMenu: {
+    openLabel: "Sokafy ny tetezamitan'ny mombamomba",
+    title: "Ny mombamomba ahy",
+  },
   nav: {
     platform: "Sehatra",
     administration: "Fitantanana",
@@ -154,6 +158,7 @@ export const mg: Dictionary = {
     changePhoto: "Ovay ny sary",
     addCover: "Ampio sary fonony",
     changeCover: "Ovay ny sary fonony",
+    takePhoto: "Maka sary",
     sending: "Alefa…",
     uploadFailed: "Tsy nahomby ny fandefasana any amin'ny fitehirizana. Andramo indray.",
   },

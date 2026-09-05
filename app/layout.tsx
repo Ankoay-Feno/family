@@ -3,6 +3,7 @@ import { Fraunces, Instrument_Sans } from "next/font/google";
 import { getLocale } from "@/lib/i18n/server";
 import I18nProvider from "@/components/I18nProvider";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import ProfileMenu from "@/components/ProfileMenu";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -26,7 +27,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     <html lang={locale} className={`${fraunces.variable} ${instrumentSans.variable}`}>
       <body>
         <I18nProvider locale={locale}>
-          <div className="lang-switcher-slot">
+          <div className="topbar-slot">
+            <ProfileMenu />
             <LanguageSwitcher />
           </div>
           {children}

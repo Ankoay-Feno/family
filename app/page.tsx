@@ -1,12 +1,10 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { countGenerations, type PersonDTO, type RelDTO } from "@/lib/family";
 import TreeView from "@/components/TreeView";
 import CreateFamilyForm from "@/components/CreateFamilyForm";
-import SignOutButton from "@/components/SignOutButton";
 import PendingRequestNotice from "@/components/PendingRequestNotice";
 import { getServerDictionary } from "@/lib/i18n/server";
 
@@ -50,7 +48,6 @@ export default async function HomePage() {
 
   const tree = membership.tree;
   const role = membership.role as "admin" | "parent" | "member";
-  const isAdmin = role === "admin";
   const persons: PersonDTO[] = tree.persons.map((p) => ({
     id: p.id,
     name: p.name,
@@ -85,20 +82,6 @@ export default async function HomePage() {
         </div>
         <div className="head-right">
           <div className="stats">{t.home.stats(generations, persons.length, linked)}</div>
-          <div className="userbox">
-            <span>{session.user.name}</span>
-            {platformAdmin && (
-              <Link href="/plateforme" className="btn-link">
-                {t.nav.platform}
-              </Link>
-            )}
-            {isAdmin && (
-              <Link href="/admin" className="btn-link">
-                {t.nav.administration}
-              </Link>
-            )}
-            <SignOutButton />
-          </div>
         </div>
       </header>
       <TreeView

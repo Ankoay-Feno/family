@@ -57,16 +57,131 @@ body {
   font-weight: 500;
 }
 
-.lang-switcher-slot {
+.topbar-slot {
   position: fixed;
-  top: 12px;
+  top: 10px;
   right: 14px;
   z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 999px;
-  padding: 5px 12px;
+  padding: 4px 12px 4px 4px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* ---------- menu profil (façon Facebook) ---------- */
+
+.profile-trigger.avatar {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  background: var(--chip);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.profile-fallback {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+}
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 24, 19, 0.45);
+  z-index: 40;
+  display: flex;
+  justify-content: flex-end;
+}
+.drawer-panel {
+  background: var(--surface);
+  width: 100%;
+  max-width: 340px;
+  height: 100%;
+  overflow-y: auto;
+  padding: 22px;
+  border-left: 1px solid var(--line);
+  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: drawer-in 0.18s ease-out;
+}
+@keyframes drawer-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+.drawer-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.drawer-avatar {
+  width: 56px;
+  height: 56px;
+  flex: none;
+}
+.drawer-avatar .profile-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: var(--chip);
+  border-radius: 50%;
+  font-size: 20px;
+}
+.drawer-identity {
+  flex: 1;
+  min-width: 0;
+}
+.drawer-name {
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 4px;
+  overflow-wrap: anywhere;
+}
+.drawer-close {
+  flex: none;
+}
+.drawer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+.drawer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+.drawer-link {
+  padding: 8px 4px;
+  border-radius: 8px;
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 14px;
+}
+.drawer-link:hover {
+  background: var(--chip);
+}
+.drawer-signout {
+  margin-top: auto;
 }
 
 /* ---------- boutons ---------- */

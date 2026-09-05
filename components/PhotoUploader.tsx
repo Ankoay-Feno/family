@@ -22,6 +22,7 @@ export default function PhotoUploader({
 }) {
   const { t } = useI18n();
   const inputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -64,6 +65,7 @@ export default function PhotoUploader({
     } finally {
       setBusy(false);
       if (inputRef.current) inputRef.current.value = "";
+      if (cameraInputRef.current) cameraInputRef.current.value = "";
     }
   }
 
@@ -77,14 +79,26 @@ export default function PhotoUploader({
         : t.photo.addCover;
   return (
     <span style={{ display: "inline-flex", flexDirection: "column", gap: 4 }}>
-      <button
-        type="button"
-        className="btn btn-ghost"
-        disabled={busy}
-        onClick={() => inputRef.current?.click()}
-      >
-        {busy ? t.photo.sending : label}
-      </button>
+      <span style={{ display: "inline-flex", gap: 6 }}>
+        <button
+          type="button"
+          className="btn btn-ghost"
+          disabled={busy}
+          onClick={() => inputRef.current?.click()}
+        >
+          {busy ? t.photo.sending : label}
+        </button>
+        {kind === "profile" && (
+          <button
+            type="button"
+            className="btn btn-ghost"
+            disabled={busy}
+            onClick={() => cameraInputRef.current?.click()}
+          >
+            {t.photo.takePhoto}
+          </button>
+        )}
+      </span>
       <input
         ref={inputRef}
         type="file"
@@ -92,6 +106,16 @@ export default function PhotoUploader({
         hidden
         onChange={(e) => onFile(e.target.files?.[0] ?? null)}
       />
+      {kind === "profile" && (
+        <input
+          ref={cameraInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          capture="user"
+          hidden
+          onChange={(e) => onFile(e.target.files?.[0] ?? null)}
+        />
+      )}
       {error && <span className="form-error" style={{ margin: 0 }}>{error}</span>}
     </span>
   );
