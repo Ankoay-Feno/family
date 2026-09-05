@@ -40,6 +40,7 @@ export type PersonMinAggregateOutputType = {
   id: string | null
   treeId: string | null
   name: string | null
+  nickname: string | null
   sex: string | null
   birthYear: number | null
   deathYear: number | null
@@ -54,6 +55,7 @@ export type PersonMaxAggregateOutputType = {
   id: string | null
   treeId: string | null
   name: string | null
+  nickname: string | null
   sex: string | null
   birthYear: number | null
   deathYear: number | null
@@ -68,6 +70,7 @@ export type PersonCountAggregateOutputType = {
   id: number
   treeId: number
   name: number
+  nickname: number
   sex: number
   birthYear: number
   deathYear: number
@@ -94,6 +97,7 @@ export type PersonMinAggregateInputType = {
   id?: true
   treeId?: true
   name?: true
+  nickname?: true
   sex?: true
   birthYear?: true
   deathYear?: true
@@ -108,6 +112,7 @@ export type PersonMaxAggregateInputType = {
   id?: true
   treeId?: true
   name?: true
+  nickname?: true
   sex?: true
   birthYear?: true
   deathYear?: true
@@ -122,6 +127,7 @@ export type PersonCountAggregateInputType = {
   id?: true
   treeId?: true
   name?: true
+  nickname?: true
   sex?: true
   birthYear?: true
   deathYear?: true
@@ -223,6 +229,7 @@ export type PersonGroupByOutputType = {
   id: string
   treeId: string
   name: string
+  nickname: string | null
   sex: string
   birthYear: number | null
   deathYear: number | null
@@ -260,6 +267,7 @@ export type PersonWhereInput = {
   id?: Prisma.StringFilter<"Person"> | string
   treeId?: Prisma.StringFilter<"Person"> | string
   name?: Prisma.StringFilter<"Person"> | string
+  nickname?: Prisma.StringNullableFilter<"Person"> | string | null
   sex?: Prisma.StringFilter<"Person"> | string
   birthYear?: Prisma.IntNullableFilter<"Person"> | number | null
   deathYear?: Prisma.IntNullableFilter<"Person"> | number | null
@@ -279,6 +287,7 @@ export type PersonOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   treeId?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  nickname?: Prisma.SortOrderInput | Prisma.SortOrder
   sex?: Prisma.SortOrder
   birthYear?: Prisma.SortOrderInput | Prisma.SortOrder
   deathYear?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -302,6 +311,7 @@ export type PersonWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.PersonWhereInput | Prisma.PersonWhereInput[]
   treeId?: Prisma.StringFilter<"Person"> | string
   name?: Prisma.StringFilter<"Person"> | string
+  nickname?: Prisma.StringNullableFilter<"Person"> | string | null
   sex?: Prisma.StringFilter<"Person"> | string
   birthYear?: Prisma.IntNullableFilter<"Person"> | number | null
   deathYear?: Prisma.IntNullableFilter<"Person"> | number | null
@@ -320,6 +330,7 @@ export type PersonOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   treeId?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  nickname?: Prisma.SortOrderInput | Prisma.SortOrder
   sex?: Prisma.SortOrder
   birthYear?: Prisma.SortOrderInput | Prisma.SortOrder
   deathYear?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -342,6 +353,7 @@ export type PersonScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Person"> | string
   treeId?: Prisma.StringWithAggregatesFilter<"Person"> | string
   name?: Prisma.StringWithAggregatesFilter<"Person"> | string
+  nickname?: Prisma.StringNullableWithAggregatesFilter<"Person"> | string | null
   sex?: Prisma.StringWithAggregatesFilter<"Person"> | string
   birthYear?: Prisma.IntNullableWithAggregatesFilter<"Person"> | number | null
   deathYear?: Prisma.IntNullableWithAggregatesFilter<"Person"> | number | null
@@ -355,6 +367,7 @@ export type PersonScalarWhereWithAggregatesInput = {
 export type PersonCreateInput = {
   id?: string
   name: string
+  nickname?: string | null
   sex: string
   birthYear?: number | null
   deathYear?: number | null
@@ -373,6 +386,7 @@ export type PersonUncheckedCreateInput = {
   id?: string
   treeId: string
   name: string
+  nickname?: string | null
   sex: string
   birthYear?: number | null
   deathYear?: number | null
@@ -389,6 +403,7 @@ export type PersonUncheckedCreateInput = {
 export type PersonUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -407,6 +422,7 @@ export type PersonUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -424,6 +440,7 @@ export type PersonCreateManyInput = {
   id?: string
   treeId: string
   name: string
+  nickname?: string | null
   sex: string
   birthYear?: number | null
   deathYear?: number | null
@@ -437,6 +454,7 @@ export type PersonCreateManyInput = {
 export type PersonUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -450,6 +468,7 @@ export type PersonUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -479,6 +498,7 @@ export type PersonCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   treeId?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  nickname?: Prisma.SortOrder
   sex?: Prisma.SortOrder
   birthYear?: Prisma.SortOrder
   deathYear?: Prisma.SortOrder
@@ -498,6 +518,7 @@ export type PersonMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   treeId?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  nickname?: Prisma.SortOrder
   sex?: Prisma.SortOrder
   birthYear?: Prisma.SortOrder
   deathYear?: Prisma.SortOrder
@@ -512,6 +533,7 @@ export type PersonMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   treeId?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  nickname?: Prisma.SortOrder
   sex?: Prisma.SortOrder
   birthYear?: Prisma.SortOrder
   deathYear?: Prisma.SortOrder
@@ -659,6 +681,7 @@ export type PersonUpdateOneRequiredWithoutInvitationsNestedInput = {
 export type PersonCreateWithoutUserInput = {
   id?: string
   name: string
+  nickname?: string | null
   sex: string
   birthYear?: number | null
   deathYear?: number | null
@@ -676,6 +699,7 @@ export type PersonUncheckedCreateWithoutUserInput = {
   id?: string
   treeId: string
   name: string
+  nickname?: string | null
   sex: string
   birthYear?: number | null
   deathYear?: number | null
@@ -707,6 +731,7 @@ export type PersonUpdateToOneWithWhereWithoutUserInput = {
 export type PersonUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -724,6 +749,7 @@ export type PersonUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -739,6 +765,7 @@ export type PersonUncheckedUpdateWithoutUserInput = {
 export type PersonCreateWithoutTreeInput = {
   id?: string
   name: string
+  nickname?: string | null
   sex: string
   birthYear?: number | null
   deathYear?: number | null
@@ -755,6 +782,7 @@ export type PersonCreateWithoutTreeInput = {
 export type PersonUncheckedCreateWithoutTreeInput = {
   id?: string
   name: string
+  nickname?: string | null
   sex: string
   birthYear?: number | null
   deathYear?: number | null
@@ -801,6 +829,7 @@ export type PersonScalarWhereInput = {
   id?: Prisma.StringFilter<"Person"> | string
   treeId?: Prisma.StringFilter<"Person"> | string
   name?: Prisma.StringFilter<"Person"> | string
+  nickname?: Prisma.StringNullableFilter<"Person"> | string | null
   sex?: Prisma.StringFilter<"Person"> | string
   birthYear?: Prisma.IntNullableFilter<"Person"> | number | null
   deathYear?: Prisma.IntNullableFilter<"Person"> | number | null
@@ -814,6 +843,7 @@ export type PersonScalarWhereInput = {
 export type PersonCreateWithoutRelsFromInput = {
   id?: string
   name: string
+  nickname?: string | null
   sex: string
   birthYear?: number | null
   deathYear?: number | null
@@ -831,6 +861,7 @@ export type PersonUncheckedCreateWithoutRelsFromInput = {
   id?: string
   treeId: string
   name: string
+  nickname?: string | null
   sex: string
   birthYear?: number | null
   deathYear?: number | null
@@ -851,6 +882,7 @@ export type PersonCreateOrConnectWithoutRelsFromInput = {
 export type PersonCreateWithoutRelsToInput = {
   id?: string
   name: string
+  nickname?: string | null
   sex: string
   birthYear?: number | null
   deathYear?: number | null
@@ -868,6 +900,7 @@ export type PersonUncheckedCreateWithoutRelsToInput = {
   id?: string
   treeId: string
   name: string
+  nickname?: string | null
   sex: string
   birthYear?: number | null
   deathYear?: number | null
@@ -899,6 +932,7 @@ export type PersonUpdateToOneWithWhereWithoutRelsFromInput = {
 export type PersonUpdateWithoutRelsFromInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -916,6 +950,7 @@ export type PersonUncheckedUpdateWithoutRelsFromInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -942,6 +977,7 @@ export type PersonUpdateToOneWithWhereWithoutRelsToInput = {
 export type PersonUpdateWithoutRelsToInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -959,6 +995,7 @@ export type PersonUncheckedUpdateWithoutRelsToInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -974,6 +1011,7 @@ export type PersonUncheckedUpdateWithoutRelsToInput = {
 export type PersonCreateWithoutInvitationsInput = {
   id?: string
   name: string
+  nickname?: string | null
   sex: string
   birthYear?: number | null
   deathYear?: number | null
@@ -991,6 +1029,7 @@ export type PersonUncheckedCreateWithoutInvitationsInput = {
   id?: string
   treeId: string
   name: string
+  nickname?: string | null
   sex: string
   birthYear?: number | null
   deathYear?: number | null
@@ -1022,6 +1061,7 @@ export type PersonUpdateToOneWithWhereWithoutInvitationsInput = {
 export type PersonUpdateWithoutInvitationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1039,6 +1079,7 @@ export type PersonUncheckedUpdateWithoutInvitationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1054,6 +1095,7 @@ export type PersonUncheckedUpdateWithoutInvitationsInput = {
 export type PersonCreateManyTreeInput = {
   id?: string
   name: string
+  nickname?: string | null
   sex: string
   birthYear?: number | null
   deathYear?: number | null
@@ -1067,6 +1109,7 @@ export type PersonCreateManyTreeInput = {
 export type PersonUpdateWithoutTreeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1083,6 +1126,7 @@ export type PersonUpdateWithoutTreeInput = {
 export type PersonUncheckedUpdateWithoutTreeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1099,6 +1143,7 @@ export type PersonUncheckedUpdateWithoutTreeInput = {
 export type PersonUncheckedUpdateManyWithoutTreeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1162,6 +1207,7 @@ export type PersonSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   id?: boolean
   treeId?: boolean
   name?: boolean
+  nickname?: boolean
   sex?: boolean
   birthYear?: boolean
   deathYear?: boolean
@@ -1182,6 +1228,7 @@ export type PersonSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   id?: boolean
   treeId?: boolean
   name?: boolean
+  nickname?: boolean
   sex?: boolean
   birthYear?: boolean
   deathYear?: boolean
@@ -1198,6 +1245,7 @@ export type PersonSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   id?: boolean
   treeId?: boolean
   name?: boolean
+  nickname?: boolean
   sex?: boolean
   birthYear?: boolean
   deathYear?: boolean
@@ -1214,6 +1262,7 @@ export type PersonSelectScalar = {
   id?: boolean
   treeId?: boolean
   name?: boolean
+  nickname?: boolean
   sex?: boolean
   birthYear?: boolean
   deathYear?: boolean
@@ -1224,7 +1273,7 @@ export type PersonSelectScalar = {
   createdAt?: boolean
 }
 
-export type PersonOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "treeId" | "name" | "sex" | "birthYear" | "deathYear" | "photoUrl" | "coverUrl" | "email" | "userId" | "createdAt", ExtArgs["result"]["person"]>
+export type PersonOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "treeId" | "name" | "nickname" | "sex" | "birthYear" | "deathYear" | "photoUrl" | "coverUrl" | "email" | "userId" | "createdAt", ExtArgs["result"]["person"]>
 export type PersonInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tree?: boolean | Prisma.TreeDefaultArgs<ExtArgs>
   user?: boolean | Prisma.Person$userArgs<ExtArgs>
@@ -1255,6 +1304,7 @@ export type $PersonPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     id: string
     treeId: string
     name: string
+    nickname: string | null
     sex: string
     birthYear: number | null
     deathYear: number | null
@@ -1694,6 +1744,7 @@ export interface PersonFieldRefs {
   readonly id: Prisma.FieldRef<"Person", 'String'>
   readonly treeId: Prisma.FieldRef<"Person", 'String'>
   readonly name: Prisma.FieldRef<"Person", 'String'>
+  readonly nickname: Prisma.FieldRef<"Person", 'String'>
   readonly sex: Prisma.FieldRef<"Person", 'String'>
   readonly birthYear: Prisma.FieldRef<"Person", 'Int'>
   readonly deathYear: Prisma.FieldRef<"Person", 'Int'>

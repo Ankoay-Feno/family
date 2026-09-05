@@ -154,6 +154,7 @@ export const PersonScalarFieldEnum = {
   id: 'id',
   treeId: 'treeId',
   name: 'name',
+  nickname: 'nickname',
   sex: 'sex',
   birthYear: 'birthYear',
   deathYear: 'deathYear',
