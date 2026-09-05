@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { setPersonNickname } from "@/app/actions/person";
 import { MAX_NICKNAME_LENGTH } from "@/lib/limits";
 import { useI18n } from "./I18nProvider";
+import Spinner from "./Spinner";
 
 export default function NicknameEditor({
   personId,
@@ -68,6 +69,7 @@ export default function NicknameEditor({
           }}
         />
         <button type="button" className="btn btn-ghost" disabled={busy} onClick={save}>
+          {busy && <Spinner />}
           {busy ? t.nickname.saving : t.nickname.save}
         </button>
         <button

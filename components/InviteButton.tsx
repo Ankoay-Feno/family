@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import { createInvitation, type InviteState } from "@/app/actions/invitations";
 import { useI18n } from "./I18nProvider";
+import Spinner from "./Spinner";
 
 const initial: InviteState = { ok: false };
 
@@ -109,6 +110,7 @@ function InviteDialog({
                 {t.common.cancel}
               </button>
               <button type="submit" className="btn btn-primary" disabled={pending}>
+                {pending && <Spinner />}
                 {pending ? t.invite.generating : t.invite.generate}
               </button>
             </div>

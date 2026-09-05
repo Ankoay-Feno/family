@@ -6,6 +6,7 @@ import { submitAddMember, type SubmitState } from "@/app/actions/proposals";
 import type { PersonDTO } from "@/lib/family";
 import { MAX_NICKNAME_LENGTH } from "@/lib/limits";
 import { useI18n } from "./I18nProvider";
+import Spinner from "./Spinner";
 
 const initial: SubmitState = { ok: false };
 
@@ -116,6 +117,7 @@ export default function AddMemberDialog({
                 {t.common.cancel}
               </button>
               <button type="submit" className="btn btn-primary" disabled={pending}>
+                {pending && <Spinner />}
                 {pending
                   ? t.addMember.sending
                   : role === "member"

@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { setFamilyRole } from "@/app/actions/roles";
 import type { ActionState } from "@/app/actions";
 import { useI18n } from "@/components/I18nProvider";
+import Spinner from "@/components/Spinner";
 
 const initial: ActionState = { ok: false };
 
@@ -23,8 +24,9 @@ export default function FamilyRoleToggle({
       <input type="hidden" name="membershipId" value={membershipId} />
       <input type="hidden" name="role" value={target} />
       <button type="submit" className="btn btn-ghost" disabled={pending}>
+        {pending && <Spinner />}
         {pending
-          ? "…"
+          ? ""
           : target === "parent"
             ? t.admin.members.giveParentRole
             : t.admin.members.backToMember}

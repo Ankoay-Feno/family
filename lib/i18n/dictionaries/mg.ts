@@ -22,6 +22,7 @@ export const mg: Dictionary = {
     platform: "Sehatra",
     administration: "Fitantanana",
     signOut: "Mivoaka",
+    signingOut: "Miala…",
     backToTree: "← Miverina any amin'ny hazo firazanana",
   },
   home: {
@@ -159,6 +160,7 @@ export const mg: Dictionary = {
     addCover: "Ampio sary fonony",
     changeCover: "Ovay ny sary fonony",
     takePhoto: "Maka sary",
+    chooseFile: "Misafidy rakitra",
     sending: "Alefa…",
     uploadFailed: "Tsy nahomby ny fandefasana any amin'ny fitehirizana. Andramo indray.",
   },

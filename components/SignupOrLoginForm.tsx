@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { useI18n } from "./I18nProvider";
+import Spinner from "./Spinner";
 
 /**
  * Création de compte / connexion embarquée dans les pages publiques
@@ -92,6 +93,7 @@ export default function SignupOrLoginForm({
       </label>
       {error && <p className="form-error">{error}</p>}
       <button type="submit" className="btn btn-primary btn-block" disabled={pending}>
+        {pending && <Spinner />}
         {pending
           ? mode === "signup"
             ? t.signup.creating

@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { createFamilyPlatform, type CreateFamilyState } from "@/app/actions/platform";
 import { useI18n } from "@/components/I18nProvider";
+import Spinner from "@/components/Spinner";
 
 const initial: CreateFamilyState = { ok: false };
 
@@ -66,6 +67,7 @@ export default function PlatformCreateFamily() {
       </label>
       {state.error && <p className="form-error">{state.error}</p>}
       <button type="submit" className="btn btn-primary" disabled={pending}>
+        {pending && <Spinner />}
         {pending ? t.platform.createForm.submitting : t.platform.createForm.submit}
       </button>
     </form>

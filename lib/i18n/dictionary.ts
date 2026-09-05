@@ -63,6 +63,7 @@ export type Dictionary = {
     platform: string;
     administration: string;
     signOut: string;
+    signingOut: string;
     backToTree: string;
   };
   home: {
@@ -163,6 +164,7 @@ export type Dictionary = {
     addCover: string;
     changeCover: string;
     takePhoto: string;
+    chooseFile: string;
     sending: string;
     uploadFailed: string;
   };

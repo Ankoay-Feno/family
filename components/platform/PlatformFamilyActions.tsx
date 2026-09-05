@@ -8,6 +8,7 @@ import {
 } from "@/app/actions/platform";
 import type { ActionState } from "@/app/actions";
 import { useI18n } from "@/components/I18nProvider";
+import Spinner from "@/components/Spinner";
 
 const inviteInitial: CreateFamilyState = { ok: false };
 const deleteInitial: ActionState = { ok: false };
@@ -55,6 +56,7 @@ export default function PlatformFamilyActions({
           <form action={inviteAction}>
             <input type="hidden" name="treeId" value={treeId} />
             <button type="submit" className="btn btn-ghost" disabled={invitePending}>
+              {invitePending && <Spinner />}
               {invitePending
                 ? t.platform.familyActions.regenerating
                 : t.platform.familyActions.regenerate}
@@ -66,6 +68,7 @@ export default function PlatformFamilyActions({
             <input type="hidden" name="treeId" value={treeId} />
             <span className="queue-meta">{t.platform.familyActions.confirmDelete(treeName)}</span>
             <button type="submit" className="btn btn-danger" disabled={deletePending}>
+              {deletePending && <Spinner />}
               {deletePending ? t.platform.familyActions.deleting : t.platform.familyActions.confirm}
             </button>
             <button

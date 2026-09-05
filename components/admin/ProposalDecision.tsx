@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { approveProposal, rejectProposal } from "@/app/actions/proposals";
 import type { ActionState } from "@/app/actions";
 import { useI18n } from "@/components/I18nProvider";
+import Spinner from "@/components/Spinner";
 
 const initial: ActionState = { ok: false };
 
@@ -19,6 +20,7 @@ export default function ProposalDecision({ proposalId }: { proposalId: string })
         <form action={approveAction}>
           <input type="hidden" name="proposalId" value={proposalId} />
           <button type="submit" className="btn btn-primary" disabled={busy}>
+            {approving && <Spinner />}
             {approving ? t.admin.proposals.approving : t.admin.proposals.approve}
           </button>
         </form>
@@ -41,6 +43,7 @@ export default function ProposalDecision({ proposalId }: { proposalId: string })
             }}
           />
           <button type="submit" className="btn btn-ghost" disabled={busy}>
+            {rejecting && <Spinner />}
             {rejecting ? t.admin.proposals.rejecting : t.admin.proposals.reject}
           </button>
         </form>

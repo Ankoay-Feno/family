@@ -184,6 +184,83 @@ body {
   margin-top: auto;
 }
 
+/* ---------- popup de choix de photo (prendre / choisir un fichier) ------- */
+
+.photo-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 24, 19, 0.45);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.photo-menu-panel {
+  background: var(--surface);
+  width: 100%;
+  max-width: 280px;
+  border-radius: 14px;
+  padding: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  animation: photo-menu-in 0.12s ease-out;
+}
+@keyframes photo-menu-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.photo-menu-option {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: none;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  text-align: center;
+  cursor: pointer;
+}
+.photo-menu-option:hover {
+  background: var(--chip);
+}
+.photo-menu-cancel {
+  margin-top: 4px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  color: var(--muted);
+}
+
+/* ---------- spinner (états « en cours » : connexion, envoi, etc.) -------- */
+
+.spinner {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  opacity: 0.85;
+  animation: spin 0.6s linear infinite;
+  vertical-align: -2px;
+  margin-right: 6px;
+  flex: none;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* ---------- boutons ---------- */
 
 .btn {

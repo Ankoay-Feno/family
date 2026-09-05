@@ -3,6 +3,7 @@
 import { useActionState, type CSSProperties } from "react";
 import { submitJoinRequest, type JoinState } from "@/app/actions/join-requests";
 import { useI18n } from "./I18nProvider";
+import Spinner from "./Spinner";
 
 const initial: JoinState = { ok: false };
 
@@ -52,6 +53,7 @@ export default function JoinRequestForm({
       </label>
       {state.error && <p className="form-error">{state.error}</p>}
       <button type="submit" className="btn btn-primary btn-block" disabled={pending}>
+        {pending && <Spinner />}
         {pending ? t.join.sending : t.join.submit}
       </button>
     </form>

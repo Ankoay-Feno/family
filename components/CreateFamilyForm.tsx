@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { createFamily, type ActionState } from "@/app/actions";
 import { useI18n } from "./I18nProvider";
+import Spinner from "./Spinner";
 
 const initial: ActionState = { ok: false };
 
@@ -42,6 +43,7 @@ export default function CreateFamilyForm({ userName }: { userName: string }) {
         </label>
         {state.error && <p className="form-error">{state.error}</p>}
         <button type="submit" className="btn btn-primary btn-block" disabled={pending}>
+          {pending && <Spinner />}
           {pending ? t.createFamily.submitting : t.createFamily.submit}
         </button>
       </form>

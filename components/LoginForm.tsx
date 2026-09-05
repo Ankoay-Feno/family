@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { useI18n } from "./I18nProvider";
+import Spinner from "./Spinner";
 
 // Connexion uniquement : la création de compte se fait exclusivement via un
 // lien d'invitation (/invite/…) ou le lien de présentation d'une famille
@@ -68,6 +69,7 @@ export default function LoginForm() {
         </label>
         {error && <p className="form-error">{error}</p>}
         <button type="submit" className="btn btn-primary btn-block" disabled={pending}>
+          {pending && <Spinner />}
           {pending ? t.login.submitPending : t.login.submit}
         </button>
       </form>

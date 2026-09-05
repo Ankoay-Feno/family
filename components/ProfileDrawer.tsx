@@ -13,6 +13,7 @@ import Avatar from "./Avatar";
 import PhotoUploader from "./PhotoUploader";
 import NicknameEditor from "./NicknameEditor";
 import { useI18n } from "./I18nProvider";
+import Spinner from "./Spinner";
 
 export default function ProfileDrawer({
   userName,
@@ -27,6 +28,7 @@ export default function ProfileDrawer({
 }) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -112,13 +114,16 @@ export default function ProfileDrawer({
             <button
               type="button"
               className="btn btn-ghost btn-block drawer-signout"
+              disabled={signingOut}
               onClick={async () => {
+                setSigningOut(true);
                 await authClient.signOut();
                 router.push("/login");
                 router.refresh();
               }}
             >
-              {t.nav.signOut}
+              {signingOut && <Spinner />}
+              {signingOut ? t.nav.signingOut : t.nav.signOut}
             </button>
           </aside>
         </div>

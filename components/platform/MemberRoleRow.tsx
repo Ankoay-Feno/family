@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { setRolePlatform } from "@/app/actions/roles";
 import type { ActionState } from "@/app/actions";
 import { useI18n } from "@/components/I18nProvider";
+import Spinner from "@/components/Spinner";
 
 const initial: ActionState = { ok: false };
 
@@ -46,7 +47,8 @@ export default function MemberRoleRow({
           <option value="member">{t.platform.memberRole.roleMember}</option>
         </select>
         <button type="submit" className="btn btn-ghost" disabled={pending}>
-          {pending ? "…" : t.platform.memberRole.apply}
+          {pending && <Spinner />}
+          {pending ? "" : t.platform.memberRole.apply}
         </button>
         {state.error && <span className="form-error" style={{ margin: 0 }}>{state.error}</span>}
       </form>

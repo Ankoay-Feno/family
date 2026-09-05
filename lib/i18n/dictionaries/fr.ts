@@ -22,6 +22,7 @@ export const fr: Dictionary = {
     platform: "Plateforme",
     administration: "Administration",
     signOut: "Se déconnecter",
+    signingOut: "Déconnexion…",
     backToTree: "← Retour à l'arbre",
   },
   home: {
@@ -159,6 +160,7 @@ export const fr: Dictionary = {
     addCover: "Ajouter une couverture",
     changeCover: "Changer la couverture",
     takePhoto: "Prendre une photo",
+    chooseFile: "Choisir un fichier",
     sending: "Envoi…",
     uploadFailed: "L'envoi vers le stockage a échoué. Réessayez.",
   },
