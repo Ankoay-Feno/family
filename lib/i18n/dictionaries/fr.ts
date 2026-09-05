@@ -142,8 +142,9 @@ export const fr: Dictionary = {
     relationParent: "Parent de…",
     relationSpouse: "Conjoint·e de…",
     relativeTo: "Par rapport à",
+    bothParentsLabel: (spouseName) => `Aussi enfant de ${spouseName} (couple)`,
     spouseHint:
-      "Pour « Enfant de… », le conjoint de la personne choisie devient automatiquement le second parent.",
+      "Pour « Enfant de… », vous pouvez choisir le couple (les deux parents) ou un seul parent.",
     propose: "Proposer",
     add: "Ajouter",
     sending: "Envoi…",

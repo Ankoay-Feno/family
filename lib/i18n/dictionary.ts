@@ -149,6 +149,7 @@ export type Dictionary = {
     relationParent: string;
     relationSpouse: string;
     relativeTo: string;
+    bothParentsLabel: (spouseName: string) => string;
     spouseHint: string;
     propose: string;
     add: string;

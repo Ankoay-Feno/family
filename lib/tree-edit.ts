@@ -20,6 +20,9 @@ export type AddMemberInput = {
   photoUrl: string | null;
   relType: "CHILD_OF" | "PARENT_OF" | "SPOUSE_OF";
   anchorId: string;
+  /** CHILD_OF seulement : si l'ancre a un·e conjoint·e, l'ajouter aussi comme
+   *  parent (couple) ou non (ancre seule). Sans effet sinon. */
+  bothParents: boolean;
 };
 
 export function parseAddMemberForm(
@@ -57,6 +60,7 @@ export function parseAddMemberForm(
       email,
       photoUrl: null,
       relType,
+      bothParents: formData.get("bothParents") === "yes",
     } as AddMemberInput,
   };
 }
@@ -127,7 +131,7 @@ export async function applyAddMember(
         data: { treeId: input.treeId, type: "PARENT", fromId: input.anchorId, toId: created.id },
       });
       const coParent = spouseOf(rels, input.anchorId);
-      if (coParent)
+      if (coParent && input.bothParents)
         await tx.relationship.create({
           data: { treeId: input.treeId, type: "PARENT", fromId: coParent, toId: created.id },
         });

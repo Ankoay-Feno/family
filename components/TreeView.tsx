@@ -347,6 +347,7 @@ export default function TreeView({
         <AddMemberDialog
           treeId={treeId}
           persons={persons}
+          rels={rels}
           role={role}
           onClose={() => setDialogOpen(false)}
         />

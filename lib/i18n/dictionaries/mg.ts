@@ -142,8 +142,9 @@ export const mg: Dictionary = {
     relationParent: "Ray aman-drenin'i…",
     relationSpouse: "Vadin'i…",
     relativeTo: "Mifandraika amin'i",
+    bothParentsLabel: (spouseName) => `Zanak'i ${spouseName} koa (mpivady)`,
     spouseHint:
-      "Ho an'ny « Zanak'i… », ny vadin'ilay olona voafidy dia ho lasa ray aman-dreny faharoa avy hatrany.",
+      "Ho an'ny « Zanak'i… », azonao safidiana ny mpivady (ray aman-dreny roa) na ray aman-dreny tokana.",
     propose: "Atolotra",
     add: "Ampiana",
     sending: "Alefa…",
