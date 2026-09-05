@@ -3,11 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { requestPhotoUpload, setPersonPhoto, type PhotoKind } from "@/app/actions/photos";
+import { imageFileFromPaste, readClipboardImage } from "@/lib/clipboard-image";
 import { useI18n } from "./I18nProvider";
 import Spinner from "./Spinner";
 
 /**
- * Bouton « Photo » / « Couverture » d'une carte.
+ * Bouton « Photo » / « Couverture » d'une carte. Ouvre un popup de choix :
+ * prendre une photo (profil seulement), choisir un fichier, ou coller une
+ * image (bouton, ou Ctrl+V tant que le popup est ouvert).
  * Chemin nominal : presign → PUT direct navigateur → stockage objet, puis on
  * n'envoie que l'URL au serveur. Repli sans stockage objet : le fichier part
  * dans la server action.
@@ -43,6 +46,21 @@ export default function PhotoUploader({
     return () => window.removeEventListener("keydown", onKey, { capture: true });
   }, [menuOpen]);
 
+  // Ctrl+V / Cmd+V tant que le popup est ouvert.
+  const onFileRef = useRef<(file: File | null) => Promise<void>>(async () => {});
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onPaste = (e: ClipboardEvent) => {
+      const file = imageFileFromPaste(e);
+      if (!file) return;
+      e.preventDefault();
+      setMenuOpen(false);
+      void onFileRef.current(file);
+    };
+    document.addEventListener("paste", onPaste);
+    return () => document.removeEventListener("paste", onPaste);
+  }, [menuOpen]);
+
   async function onFile(file: File | null) {
     if (!file) return;
     setError(null);
@@ -74,7 +92,7 @@ export default function PhotoUploader({
 
       const result = await setPersonPhoto({ ok: false }, data);
       if (!result.ok) {
-        setError(result.error ?? "Erreur inattendue.");
+        setError(result.error ?? t.common.unexpectedError);
         return;
       }
       router.refresh();
@@ -83,6 +101,21 @@ export default function PhotoUploader({
       if (inputRef.current) inputRef.current.value = "";
       if (cameraInputRef.current) cameraInputRef.current.value = "";
     }
+  }
+  useEffect(() => {
+    onFileRef.current = onFile;
+  });
+
+  // À appeler directement depuis le clic : l'API Clipboard exige un geste utilisateur.
+  async function pasteFromClipboard() {
+    setMenuOpen(false);
+    setError(null);
+    const result = await readClipboardImage();
+    if ("error" in result) {
+      setError(result.error === "unsupported" ? t.photo.clipboardUnsupported : t.photo.clipboardEmpty);
+      return;
+    }
+    await onFile(result.file);
   }
 
   const label =
@@ -94,14 +127,9 @@ export default function PhotoUploader({
         ? t.photo.changeCover
         : t.photo.addCover;
 
-  function openPicker() {
-    if (hasCamera) setMenuOpen(true);
-    else inputRef.current?.click();
-  }
-
   return (
     <span style={{ display: "inline-flex", flexDirection: "column", gap: 4 }}>
-      <button type="button" className="btn btn-ghost" disabled={busy} onClick={openPicker}>
+      <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => setMenuOpen(true)}>
         {busy && <Spinner />}
         {busy ? t.photo.sending : label}
       </button>
@@ -109,17 +137,19 @@ export default function PhotoUploader({
       {menuOpen && (
         <div className="photo-menu-overlay" onClick={() => setMenuOpen(false)}>
           <div className="photo-menu-panel" role="menu" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              className="photo-menu-option"
-              role="menuitem"
-              onClick={() => {
-                setMenuOpen(false);
-                cameraInputRef.current?.click();
-              }}
-            >
-              {t.photo.takePhoto}
-            </button>
+            {hasCamera && (
+              <button
+                type="button"
+                className="photo-menu-option"
+                role="menuitem"
+                onClick={() => {
+                  setMenuOpen(false);
+                  cameraInputRef.current?.click();
+                }}
+              >
+                {t.photo.takePhoto}
+              </button>
+            )}
             <button
               type="button"
               className="photo-menu-option"
@@ -131,6 +161,15 @@ export default function PhotoUploader({
             >
               {t.photo.chooseFile}
             </button>
+            <button
+              type="button"
+              className="photo-menu-option"
+              role="menuitem"
+              onClick={pasteFromClipboard}
+            >
+              {t.photo.pasteImage}
+            </button>
+            <span className="photo-menu-hint">{t.photo.pasteHint}</span>
             <button
               type="button"
               className="photo-menu-option photo-menu-cancel"

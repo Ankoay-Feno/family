@@ -15,6 +15,7 @@ import AddMemberDialog from "./AddMemberDialog";
 import InviteButton from "./InviteButton";
 import PhotoUploader from "./PhotoUploader";
 import NicknameEditor from "./NicknameEditor";
+import DeceasedEditor from "./DeceasedEditor";
 import { useI18n } from "./I18nProvider";
 
 type Props = {
@@ -44,13 +45,18 @@ function PersonCard({
   return (
     <button
       type="button"
-      className={`person${dimmed ? " dim" : ""}`}
+      className={`person${dimmed ? " dim" : ""}${person.deceased ? " deceased" : ""}`}
       aria-current={selected ? "true" : "false"}
       onClick={() => onSelect(person.id)}
     >
       <span className="avatar" data-avatar-id={person.id}>
         <Avatar person={person} />
         {person.hasAccount && <span className="dot" title={t.tree.panel.accountLinked} />}
+        {person.deceased && (
+          <span className="cross" title={t.deceased.label} aria-label={t.deceased.label}>
+            †
+          </span>
+        )}
       </span>
       <span className="pname">{person.name}</span>
       {person.nickname && <span className="pnickname">« {person.nickname} »</span>}
@@ -58,6 +64,9 @@ function PersonCard({
         <span className="pyear">
           {person.sex === "F" ? t.tree.bornF(person.birthYear) : t.tree.bornM(person.birthYear)}
         </span>
+      )}
+      {person.deceased && person.deathYear !== null && (
+        <span className="pdeath">† {person.deathYear}</span>
       )}
       {isYou && <span className="you-chip">{t.tree.youChip}</span>}
     </button>
@@ -271,24 +280,34 @@ export default function TreeView({
                 />
               </div>
             )}
+            {!readOnly && isAdmin && (
+              <div style={{ marginTop: 6 }}>
+                <DeceasedEditor
+                  key={`d-${selected.id}`}
+                  personId={selected.id}
+                  deceased={selected.deceased}
+                  deathYear={selected.deathYear}
+                />
+              </div>
+            )}
             <dl className="meta">
               {selected.birthYear !== null && (
                 <div>
                   <dt>{t.tree.panel.birth}</dt>
                   <dd>
-                    {selected.deathYear === null
-                      ? t.tree.panel.birthWithAge(
+                    {selected.deceased
+                      ? selected.birthYear
+                      : t.tree.panel.birthWithAge(
                           selected.birthYear,
                           new Date().getFullYear() - selected.birthYear,
-                        )
-                      : selected.birthYear}
+                        )}
                   </dd>
                 </div>
               )}
-              {selected.deathYear !== null && (
+              {selected.deceased && (
                 <div>
                   <dt>{t.tree.panel.death}</dt>
-                  <dd>{selected.deathYear}</dd>
+                  <dd>† {selected.deathYear ?? t.tree.panel.deathUnknownYear}</dd>
                 </div>
               )}
               <div>

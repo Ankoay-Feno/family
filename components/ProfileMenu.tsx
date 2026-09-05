@@ -27,6 +27,7 @@ export default async function ProfileMenu() {
         sex: user.person.sex as PersonDTO["sex"],
         birthYear: user.person.birthYear,
         deathYear: user.person.deathYear,
+        deceased: user.person.deceased || user.person.deathYear !== null,
         photoUrl: user.person.photoUrl,
         coverUrl: user.person.coverUrl,
         email: user.person.email,

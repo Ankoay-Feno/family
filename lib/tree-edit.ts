@@ -16,6 +16,8 @@ export type AddMemberInput = {
   nickname: string | null;
   sex: "M" | "F";
   birthYear: number | null;
+  deceased: boolean;
+  deathYear: number | null;
   email: string | null;
   photoUrl: string | null;
   relType: "CHILD_OF" | "PARENT_OF" | "SPOUSE_OF";
@@ -37,6 +39,9 @@ export function parseAddMemberForm(
   const sex = String(formData.get("sex") ?? "");
   const birthRaw = String(formData.get("birthYear") ?? "").trim();
   const birthYear = birthRaw ? Number(birthRaw) : null;
+  const deceased = formData.get("deceased") === "yes";
+  const deathRaw = deceased ? String(formData.get("deathYear") ?? "").trim() : "";
+  const deathYear = deathRaw ? Number(deathRaw) : null;
   const email = String(formData.get("email") ?? "").trim() || null;
 
   if (!name) return { error: t.errors.nameRequired };
@@ -45,6 +50,10 @@ export function parseAddMemberForm(
   if (sex !== "M" && sex !== "F") return { error: t.errors.sexRequired };
   if (birthYear !== null && (!Number.isInteger(birthYear) || birthYear < 1800 || birthYear > 2100))
     return { error: t.errors.invalidBirthYear };
+  if (deathYear !== null && (!Number.isInteger(deathYear) || deathYear < 1800 || deathYear > 2100))
+    return { error: t.errors.invalidDeathYear };
+  if (deathYear !== null && birthYear !== null && deathYear < birthYear)
+    return { error: t.errors.deathBeforeBirth };
   if (email !== null && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
     return { error: t.errors.invalidEmail };
   if (!["CHILD_OF", "PARENT_OF", "SPOUSE_OF"].includes(relType))
@@ -57,6 +66,8 @@ export function parseAddMemberForm(
       nickname,
       sex,
       birthYear,
+      deceased,
+      deathYear,
       email,
       photoUrl: null,
       relType,
@@ -113,6 +124,8 @@ export async function applyAddMember(
         nickname: input.nickname,
         sex: input.sex,
         birthYear: input.birthYear,
+        deceased: input.deceased ?? false,
+        deathYear: input.deathYear ?? null,
         email: input.email ?? null,
         photoUrl: input.photoUrl ?? null,
         userId: userId ?? null,

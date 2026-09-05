@@ -6,7 +6,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireMembership } from "@/lib/authz";
+import { requireAdmin, requireMembership } from "@/lib/authz";
 import { MAX_NICKNAME_LENGTH } from "@/lib/tree-edit";
 import { getServerDictionary } from "@/lib/i18n/server";
 
@@ -32,6 +32,41 @@ export async function setPersonNickname(
     await prisma.person.update({
       where: { id: person.id },
       data: { nickname: nickname || null },
+    });
+
+    revalidatePath("/");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : t.common.unexpectedError };
+  }
+}
+
+export type DeceasedState = { ok: boolean; error?: string };
+
+/** Marque une carte comme décédée (année facultative) — admins famille seulement.
+ *  Démarquer efface aussi l'année de décès. */
+export async function setPersonDeceased(
+  _prev: DeceasedState,
+  formData: FormData,
+): Promise<DeceasedState> {
+  const t = await getServerDictionary();
+  try {
+    const personId = String(formData.get("personId") ?? "");
+    const deceased = formData.get("deceased") === "yes";
+    const yearRaw = String(formData.get("deathYear") ?? "").trim();
+    const deathYear = deceased && yearRaw ? Number(yearRaw) : null;
+    if (deathYear !== null && (!Number.isInteger(deathYear) || deathYear < 1800 || deathYear > 2100))
+      return { ok: false, error: t.errors.invalidDeathYear };
+
+    const person = await prisma.person.findUnique({ where: { id: personId } });
+    if (!person) return { ok: false, error: t.errors.personNotFound };
+    await requireAdmin(person.treeId);
+    if (deathYear !== null && person.birthYear !== null && deathYear < person.birthYear)
+      return { ok: false, error: t.errors.deathBeforeBirth };
+
+    await prisma.person.update({
+      where: { id: person.id },
+      data: { deceased, deathYear },
     });
 
     revalidatePath("/");

@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { submitAddMember, type SubmitState } from "@/app/actions/proposals";
 import { spouseOf, type PersonDTO, type RelDTO } from "@/lib/family";
+import { imageFileFromPaste, readClipboardImage } from "@/lib/clipboard-image";
 import { MAX_NICKNAME_LENGTH } from "@/lib/limits";
 import { useI18n } from "./I18nProvider";
 import Spinner from "./Spinner";
@@ -28,6 +29,9 @@ export default function AddMemberDialog({
   const router = useRouter();
   const [relType, setRelType] = useState<"CHILD_OF" | "PARENT_OF" | "SPOUSE_OF">("CHILD_OF");
   const [anchorId, setAnchorId] = useState(persons[0]?.id ?? "");
+  const [deceased, setDeceased] = useState(false);
+  const [pasteError, setPasteError] = useState<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
   const anchorSpouseId = spouseOf(rels, anchorId);
   const anchorSpouse = anchorSpouseId ? persons.find((p) => p.id === anchorSpouseId) : undefined;
 
@@ -45,6 +49,37 @@ export default function AddMemberDialog({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
+
+  // Une image collée (Ctrl+V) n'importe où dans le dialogue devient la photo.
+  useEffect(() => {
+    const onPaste = (e: ClipboardEvent) => {
+      const file = imageFileFromPaste(e);
+      if (!file) return;
+      e.preventDefault();
+      attachPhoto(file);
+    };
+    document.addEventListener("paste", onPaste);
+    return () => document.removeEventListener("paste", onPaste);
+  }, []);
+
+  function attachPhoto(file: File) {
+    const input = photoInputRef.current;
+    if (!input) return;
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    input.files = dt.files;
+    setPasteError(null);
+  }
+
+  async function pasteFromClipboard() {
+    setPasteError(null);
+    const result = await readClipboardImage();
+    if ("error" in result) {
+      setPasteError(result.error === "unsupported" ? t.photo.clipboardUnsupported : t.photo.clipboardEmpty);
+      return;
+    }
+    attachPhoto(result.file);
+  }
 
   const proposalSent = state.ok && !state.applied;
 
@@ -87,14 +122,44 @@ export default function AddMemberDialog({
               <span>{t.addMember.birthYearOptional}</span>
               <input name="birthYear" type="number" min={1800} max={2100} placeholder="1976" />
             </label>
+            <div className="radio-row">
+              <label>
+                <input
+                  type="checkbox"
+                  name="deceased"
+                  value="yes"
+                  checked={deceased}
+                  onChange={(e) => setDeceased(e.target.checked)}
+                />
+                {t.addMember.deceasedLabel}
+              </label>
+            </div>
+            {deceased && (
+              <label className="field">
+                <span>{t.addMember.deathYearOptional}</span>
+                <input name="deathYear" type="number" min={1800} max={2100} placeholder="1998" />
+              </label>
+            )}
             <label className="field">
               <span>{t.addMember.emailOptional}</span>
               <input name="email" type="email" placeholder="voahangy@exemple.mg" />
             </label>
-            <label className="field">
+            <div className="field">
               <span>{t.addMember.photoOptional}</span>
-              <input name="photo" type="file" accept="image/jpeg,image/png,image/webp" />
-            </label>
+              <span style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                <input
+                  ref={photoInputRef}
+                  name="photo"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                />
+                <button type="button" className="btn btn-ghost" onClick={pasteFromClipboard}>
+                  {t.photo.pasteImage}
+                </button>
+              </span>
+              <span style={{ fontSize: 12, color: "var(--muted)" }}>{t.photo.pasteHint}</span>
+              {pasteError && <span className="form-error" style={{ margin: 0 }}>{pasteError}</span>}
+            </div>
             <label className="field">
               <span>{t.addMember.relation}</span>
               <select

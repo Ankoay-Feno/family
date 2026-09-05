@@ -112,6 +112,7 @@ model Person {
   sex       String // "M" | "F"
   birthYear Int?
   deathYear Int?
+  deceased  Boolean  @default(false) // marqué·e comme décédé·e (année facultative)
   photoUrl  String?
   coverUrl  String? // photo de couverture — au plus une par carte
   email     String? // contact de la personne — prérempli à l'invitation

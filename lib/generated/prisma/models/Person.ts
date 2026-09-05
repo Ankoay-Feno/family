@@ -44,6 +44,7 @@ export type PersonMinAggregateOutputType = {
   sex: string | null
   birthYear: number | null
   deathYear: number | null
+  deceased: boolean | null
   photoUrl: string | null
   coverUrl: string | null
   email: string | null
@@ -59,6 +60,7 @@ export type PersonMaxAggregateOutputType = {
   sex: string | null
   birthYear: number | null
   deathYear: number | null
+  deceased: boolean | null
   photoUrl: string | null
   coverUrl: string | null
   email: string | null
@@ -74,6 +76,7 @@ export type PersonCountAggregateOutputType = {
   sex: number
   birthYear: number
   deathYear: number
+  deceased: number
   photoUrl: number
   coverUrl: number
   email: number
@@ -101,6 +104,7 @@ export type PersonMinAggregateInputType = {
   sex?: true
   birthYear?: true
   deathYear?: true
+  deceased?: true
   photoUrl?: true
   coverUrl?: true
   email?: true
@@ -116,6 +120,7 @@ export type PersonMaxAggregateInputType = {
   sex?: true
   birthYear?: true
   deathYear?: true
+  deceased?: true
   photoUrl?: true
   coverUrl?: true
   email?: true
@@ -131,6 +136,7 @@ export type PersonCountAggregateInputType = {
   sex?: true
   birthYear?: true
   deathYear?: true
+  deceased?: true
   photoUrl?: true
   coverUrl?: true
   email?: true
@@ -233,6 +239,7 @@ export type PersonGroupByOutputType = {
   sex: string
   birthYear: number | null
   deathYear: number | null
+  deceased: boolean
   photoUrl: string | null
   coverUrl: string | null
   email: string | null
@@ -271,6 +278,7 @@ export type PersonWhereInput = {
   sex?: Prisma.StringFilter<"Person"> | string
   birthYear?: Prisma.IntNullableFilter<"Person"> | number | null
   deathYear?: Prisma.IntNullableFilter<"Person"> | number | null
+  deceased?: Prisma.BoolFilter<"Person"> | boolean
   photoUrl?: Prisma.StringNullableFilter<"Person"> | string | null
   coverUrl?: Prisma.StringNullableFilter<"Person"> | string | null
   email?: Prisma.StringNullableFilter<"Person"> | string | null
@@ -291,6 +299,7 @@ export type PersonOrderByWithRelationInput = {
   sex?: Prisma.SortOrder
   birthYear?: Prisma.SortOrderInput | Prisma.SortOrder
   deathYear?: Prisma.SortOrderInput | Prisma.SortOrder
+  deceased?: Prisma.SortOrder
   photoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   coverUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -315,6 +324,7 @@ export type PersonWhereUniqueInput = Prisma.AtLeast<{
   sex?: Prisma.StringFilter<"Person"> | string
   birthYear?: Prisma.IntNullableFilter<"Person"> | number | null
   deathYear?: Prisma.IntNullableFilter<"Person"> | number | null
+  deceased?: Prisma.BoolFilter<"Person"> | boolean
   photoUrl?: Prisma.StringNullableFilter<"Person"> | string | null
   coverUrl?: Prisma.StringNullableFilter<"Person"> | string | null
   email?: Prisma.StringNullableFilter<"Person"> | string | null
@@ -334,6 +344,7 @@ export type PersonOrderByWithAggregationInput = {
   sex?: Prisma.SortOrder
   birthYear?: Prisma.SortOrderInput | Prisma.SortOrder
   deathYear?: Prisma.SortOrderInput | Prisma.SortOrder
+  deceased?: Prisma.SortOrder
   photoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   coverUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -357,6 +368,7 @@ export type PersonScalarWhereWithAggregatesInput = {
   sex?: Prisma.StringWithAggregatesFilter<"Person"> | string
   birthYear?: Prisma.IntNullableWithAggregatesFilter<"Person"> | number | null
   deathYear?: Prisma.IntNullableWithAggregatesFilter<"Person"> | number | null
+  deceased?: Prisma.BoolWithAggregatesFilter<"Person"> | boolean
   photoUrl?: Prisma.StringNullableWithAggregatesFilter<"Person"> | string | null
   coverUrl?: Prisma.StringNullableWithAggregatesFilter<"Person"> | string | null
   email?: Prisma.StringNullableWithAggregatesFilter<"Person"> | string | null
@@ -371,6 +383,7 @@ export type PersonCreateInput = {
   sex: string
   birthYear?: number | null
   deathYear?: number | null
+  deceased?: boolean
   photoUrl?: string | null
   coverUrl?: string | null
   email?: string | null
@@ -390,6 +403,7 @@ export type PersonUncheckedCreateInput = {
   sex: string
   birthYear?: number | null
   deathYear?: number | null
+  deceased?: boolean
   photoUrl?: string | null
   coverUrl?: string | null
   email?: string | null
@@ -407,6 +421,7 @@ export type PersonUpdateInput = {
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deceased?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -426,6 +441,7 @@ export type PersonUncheckedUpdateInput = {
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deceased?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -444,6 +460,7 @@ export type PersonCreateManyInput = {
   sex: string
   birthYear?: number | null
   deathYear?: number | null
+  deceased?: boolean
   photoUrl?: string | null
   coverUrl?: string | null
   email?: string | null
@@ -458,6 +475,7 @@ export type PersonUpdateManyMutationInput = {
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deceased?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -472,6 +490,7 @@ export type PersonUncheckedUpdateManyInput = {
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deceased?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -502,6 +521,7 @@ export type PersonCountOrderByAggregateInput = {
   sex?: Prisma.SortOrder
   birthYear?: Prisma.SortOrder
   deathYear?: Prisma.SortOrder
+  deceased?: Prisma.SortOrder
   photoUrl?: Prisma.SortOrder
   coverUrl?: Prisma.SortOrder
   email?: Prisma.SortOrder
@@ -522,6 +542,7 @@ export type PersonMaxOrderByAggregateInput = {
   sex?: Prisma.SortOrder
   birthYear?: Prisma.SortOrder
   deathYear?: Prisma.SortOrder
+  deceased?: Prisma.SortOrder
   photoUrl?: Prisma.SortOrder
   coverUrl?: Prisma.SortOrder
   email?: Prisma.SortOrder
@@ -537,6 +558,7 @@ export type PersonMinOrderByAggregateInput = {
   sex?: Prisma.SortOrder
   birthYear?: Prisma.SortOrder
   deathYear?: Prisma.SortOrder
+  deceased?: Prisma.SortOrder
   photoUrl?: Prisma.SortOrder
   coverUrl?: Prisma.SortOrder
   email?: Prisma.SortOrder
@@ -685,6 +707,7 @@ export type PersonCreateWithoutUserInput = {
   sex: string
   birthYear?: number | null
   deathYear?: number | null
+  deceased?: boolean
   photoUrl?: string | null
   coverUrl?: string | null
   email?: string | null
@@ -703,6 +726,7 @@ export type PersonUncheckedCreateWithoutUserInput = {
   sex: string
   birthYear?: number | null
   deathYear?: number | null
+  deceased?: boolean
   photoUrl?: string | null
   coverUrl?: string | null
   email?: string | null
@@ -735,6 +759,7 @@ export type PersonUpdateWithoutUserInput = {
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deceased?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -753,6 +778,7 @@ export type PersonUncheckedUpdateWithoutUserInput = {
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deceased?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -769,6 +795,7 @@ export type PersonCreateWithoutTreeInput = {
   sex: string
   birthYear?: number | null
   deathYear?: number | null
+  deceased?: boolean
   photoUrl?: string | null
   coverUrl?: string | null
   email?: string | null
@@ -786,6 +813,7 @@ export type PersonUncheckedCreateWithoutTreeInput = {
   sex: string
   birthYear?: number | null
   deathYear?: number | null
+  deceased?: boolean
   photoUrl?: string | null
   coverUrl?: string | null
   email?: string | null
@@ -833,6 +861,7 @@ export type PersonScalarWhereInput = {
   sex?: Prisma.StringFilter<"Person"> | string
   birthYear?: Prisma.IntNullableFilter<"Person"> | number | null
   deathYear?: Prisma.IntNullableFilter<"Person"> | number | null
+  deceased?: Prisma.BoolFilter<"Person"> | boolean
   photoUrl?: Prisma.StringNullableFilter<"Person"> | string | null
   coverUrl?: Prisma.StringNullableFilter<"Person"> | string | null
   email?: Prisma.StringNullableFilter<"Person"> | string | null
@@ -847,6 +876,7 @@ export type PersonCreateWithoutRelsFromInput = {
   sex: string
   birthYear?: number | null
   deathYear?: number | null
+  deceased?: boolean
   photoUrl?: string | null
   coverUrl?: string | null
   email?: string | null
@@ -865,6 +895,7 @@ export type PersonUncheckedCreateWithoutRelsFromInput = {
   sex: string
   birthYear?: number | null
   deathYear?: number | null
+  deceased?: boolean
   photoUrl?: string | null
   coverUrl?: string | null
   email?: string | null
@@ -886,6 +917,7 @@ export type PersonCreateWithoutRelsToInput = {
   sex: string
   birthYear?: number | null
   deathYear?: number | null
+  deceased?: boolean
   photoUrl?: string | null
   coverUrl?: string | null
   email?: string | null
@@ -904,6 +936,7 @@ export type PersonUncheckedCreateWithoutRelsToInput = {
   sex: string
   birthYear?: number | null
   deathYear?: number | null
+  deceased?: boolean
   photoUrl?: string | null
   coverUrl?: string | null
   email?: string | null
@@ -936,6 +969,7 @@ export type PersonUpdateWithoutRelsFromInput = {
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deceased?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -954,6 +988,7 @@ export type PersonUncheckedUpdateWithoutRelsFromInput = {
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deceased?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -981,6 +1016,7 @@ export type PersonUpdateWithoutRelsToInput = {
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deceased?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -999,6 +1035,7 @@ export type PersonUncheckedUpdateWithoutRelsToInput = {
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deceased?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1015,6 +1052,7 @@ export type PersonCreateWithoutInvitationsInput = {
   sex: string
   birthYear?: number | null
   deathYear?: number | null
+  deceased?: boolean
   photoUrl?: string | null
   coverUrl?: string | null
   email?: string | null
@@ -1033,6 +1071,7 @@ export type PersonUncheckedCreateWithoutInvitationsInput = {
   sex: string
   birthYear?: number | null
   deathYear?: number | null
+  deceased?: boolean
   photoUrl?: string | null
   coverUrl?: string | null
   email?: string | null
@@ -1065,6 +1104,7 @@ export type PersonUpdateWithoutInvitationsInput = {
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deceased?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1083,6 +1123,7 @@ export type PersonUncheckedUpdateWithoutInvitationsInput = {
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deceased?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1099,6 +1140,7 @@ export type PersonCreateManyTreeInput = {
   sex: string
   birthYear?: number | null
   deathYear?: number | null
+  deceased?: boolean
   photoUrl?: string | null
   coverUrl?: string | null
   email?: string | null
@@ -1113,6 +1155,7 @@ export type PersonUpdateWithoutTreeInput = {
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deceased?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1130,6 +1173,7 @@ export type PersonUncheckedUpdateWithoutTreeInput = {
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deceased?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1147,6 +1191,7 @@ export type PersonUncheckedUpdateManyWithoutTreeInput = {
   sex?: Prisma.StringFieldUpdateOperationsInput | string
   birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deceased?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1211,6 +1256,7 @@ export type PersonSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   sex?: boolean
   birthYear?: boolean
   deathYear?: boolean
+  deceased?: boolean
   photoUrl?: boolean
   coverUrl?: boolean
   email?: boolean
@@ -1232,6 +1278,7 @@ export type PersonSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   sex?: boolean
   birthYear?: boolean
   deathYear?: boolean
+  deceased?: boolean
   photoUrl?: boolean
   coverUrl?: boolean
   email?: boolean
@@ -1249,6 +1296,7 @@ export type PersonSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   sex?: boolean
   birthYear?: boolean
   deathYear?: boolean
+  deceased?: boolean
   photoUrl?: boolean
   coverUrl?: boolean
   email?: boolean
@@ -1266,6 +1314,7 @@ export type PersonSelectScalar = {
   sex?: boolean
   birthYear?: boolean
   deathYear?: boolean
+  deceased?: boolean
   photoUrl?: boolean
   coverUrl?: boolean
   email?: boolean
@@ -1273,7 +1322,7 @@ export type PersonSelectScalar = {
   createdAt?: boolean
 }
 
-export type PersonOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "treeId" | "name" | "nickname" | "sex" | "birthYear" | "deathYear" | "photoUrl" | "coverUrl" | "email" | "userId" | "createdAt", ExtArgs["result"]["person"]>
+export type PersonOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "treeId" | "name" | "nickname" | "sex" | "birthYear" | "deathYear" | "deceased" | "photoUrl" | "coverUrl" | "email" | "userId" | "createdAt", ExtArgs["result"]["person"]>
 export type PersonInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tree?: boolean | Prisma.TreeDefaultArgs<ExtArgs>
   user?: boolean | Prisma.Person$userArgs<ExtArgs>
@@ -1308,6 +1357,7 @@ export type $PersonPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     sex: string
     birthYear: number | null
     deathYear: number | null
+    deceased: boolean
     photoUrl: string | null
     coverUrl: string | null
     email: string | null
@@ -1748,6 +1798,7 @@ export interface PersonFieldRefs {
   readonly sex: Prisma.FieldRef<"Person", 'String'>
   readonly birthYear: Prisma.FieldRef<"Person", 'Int'>
   readonly deathYear: Prisma.FieldRef<"Person", 'Int'>
+  readonly deceased: Prisma.FieldRef<"Person", 'Boolean'>
   readonly photoUrl: Prisma.FieldRef<"Person", 'String'>
   readonly coverUrl: Prisma.FieldRef<"Person", 'String'>
   readonly email: Prisma.FieldRef<"Person", 'String'>

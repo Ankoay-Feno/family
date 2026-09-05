@@ -158,6 +158,7 @@ export const PersonScalarFieldEnum = {
   sex: 'sex',
   birthYear: 'birthYear',
   deathYear: 'deathYear',
+  deceased: 'deceased',
   photoUrl: 'photoUrl',
   coverUrl: 'coverUrl',
   email: 'email',

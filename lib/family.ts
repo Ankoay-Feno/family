@@ -13,6 +13,8 @@ export type PersonDTO = {
   sex: "M" | "F";
   birthYear: number | null;
   deathYear: number | null;
+  /** Décédé·e (année facultative) — dérivé de `deceased || deathYear !== null`. */
+  deceased: boolean;
   photoUrl: string | null;
   coverUrl: string | null;
   email: string | null;

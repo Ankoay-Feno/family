@@ -35,6 +35,7 @@ export default async function PlatformFamilyPage({
     sex: p.sex as PersonDTO["sex"],
     birthYear: p.birthYear,
     deathYear: p.deathYear,
+    deceased: p.deceased || p.deathYear !== null,
     photoUrl: p.photoUrl,
     coverUrl: p.coverUrl,
     email: p.email,

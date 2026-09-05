@@ -126,6 +126,7 @@ export type Dictionary = {
       birth: string;
       birthWithAge: (year: number, age: number) => string;
       death: string;
+      deathUnknownYear: string;
       account: string;
       accountLinked: string;
       accountNone: string;
@@ -144,6 +145,8 @@ export type Dictionary = {
     birthYearOptional: string;
     emailOptional: string;
     photoOptional: string;
+    deceasedLabel: string;
+    deathYearOptional: string;
     relation: string;
     relationChild: string;
     relationParent: string;
@@ -166,12 +169,24 @@ export type Dictionary = {
     changeCover: string;
     takePhoto: string;
     chooseFile: string;
+    pasteImage: string;
+    pasteHint: string;
+    clipboardEmpty: string;
+    clipboardUnsupported: string;
     sending: string;
     uploadFailed: string;
   };
   nickname: {
     add: string;
     edit: string;
+    save: string;
+    saving: string;
+  };
+  deceased: {
+    label: string;
+    mark: string;
+    edit: string;
+    yearOptional: string;
     save: string;
     saving: string;
   };
@@ -380,5 +395,7 @@ export type Dictionary = {
     ownPhotoOnly: string;
     ownNicknameOnly: string;
     invalidPhotoKind: string;
+    invalidDeathYear: string;
+    deathBeforeBirth: string;
   };
 };
