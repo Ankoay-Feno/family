@@ -127,6 +127,14 @@ export const mg: Dictionary = {
       fatherInLaw: "Rafozanao lahy",
       familyMember: "Havanao",
     },
+    // Même schéma que « Dadabenao faharoa » (arrière-grand-père) : ordinal = profondeur − 1.
+    farRelation: (kind, depth, female) => {
+      const ordinals = ["", "", "faharoa", "fahatelo", "fahefatra", "fahadimy", "fahenina", "fahafito"];
+      const ord = ordinals[depth - 1] ?? `faha-${depth - 1}`;
+      return kind === "ancestor"
+        ? `${female ? "Renibenao" : "Dadabenao"} ${ord}`
+        : `Zafikelinao ${female ? "vavy" : "lahy"} ${ord}`;
+    },
   },
   addMember: {
     title: "Ampio mpikambana",
@@ -146,6 +154,8 @@ export const mg: Dictionary = {
     relationSpouse: "Vadin'i…",
     relativeTo: "Mifandraika amin'i",
     bothParentsLabel: (spouseName) => `Zanak'i ${spouseName} koa (mpivady)`,
+    marryOtherParentLabel: (parentName) => `Vadin'i ${parentName} (hanana ray aman-dreny roa ilay zaza)`,
+    linkChildrenLabel: (childrenNames) => `Ray aman-drenin'i ${childrenNames} koa`,
     spouseHint:
       "Ho an'ny « Zanak'i… », azonao safidiana ny mpivady (ray aman-dreny roa) na ray aman-dreny tokana.",
     propose: "Atolotra",

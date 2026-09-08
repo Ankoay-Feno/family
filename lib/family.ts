@@ -123,13 +123,9 @@ function ancestorDepths(rels: RelDTO[], id: string): Map<string, number> {
   return depths;
 }
 
-/** Clé du lien de sang entre root et target, ou null. */
-function bloodLabel(
-  rels: RelDTO[],
-  rootId: string,
-  targetId: string,
-  female: boolean,
-): RelationKey | null {
+/** Distance de sang [montées depuis root, descentes vers target] via l'ancêtre
+ *  commun le plus proche, ou null s'il n'y en a pas. */
+function bloodDistance(rels: RelDTO[], rootId: string, targetId: string): [number, number] | null {
   const a = ancestorDepths(rels, rootId);
   const b = ancestorDepths(rels, targetId);
   let best: [number, number] | null = null;
@@ -137,22 +133,37 @@ function bloodLabel(
     const dv = b.get(anc);
     if (dv !== undefined && (!best || du + dv < best[0] + best[1])) best = [du, dv];
   }
-  if (!best) return null;
-  const table: Record<string, [RelationKey, RelationKey]> = {
-    "1,0": ["father", "mother"],
-    "0,1": ["son", "daughter"],
-    "1,1": ["brother", "sister"],
-    "2,0": ["grandfather", "grandmother"],
-    "0,2": ["grandson", "granddaughter"],
-    "3,0": ["greatGrandfather", "greatGrandmother"],
-    "0,3": ["greatGrandson", "greatGranddaughter"],
-    "2,1": ["uncle", "aunt"],
-    "1,2": ["nephew", "niece"],
-    "2,2": ["cousinM", "cousinF"],
-  };
-  const entry = table[`${best[0]},${best[1]}`];
+  return best;
+}
+
+const BLOOD_TABLE: Record<string, [RelationKey, RelationKey]> = {
+  "1,0": ["father", "mother"],
+  "0,1": ["son", "daughter"],
+  "1,1": ["brother", "sister"],
+  "2,0": ["grandfather", "grandmother"],
+  "0,2": ["grandson", "granddaughter"],
+  "3,0": ["greatGrandfather", "greatGrandmother"],
+  "0,3": ["greatGrandson", "greatGranddaughter"],
+  "2,1": ["uncle", "aunt"],
+  "1,2": ["nephew", "niece"],
+  "2,2": ["cousinM", "cousinF"],
+};
+
+/** Clé du lien de sang entre root et target, ou null. */
+function bloodLabel(
+  rels: RelDTO[],
+  rootId: string,
+  targetId: string,
+  female: boolean,
+): RelationKey | null {
+  const d = bloodDistance(rels, rootId, targetId);
+  const entry = d && BLOOD_TABLE[`${d[0]},${d[1]}`];
   return entry ? entry[female ? 1 : 0] : null;
 }
+
+/** Ancêtre ou descendant en ligne directe au-delà de la table (profondeur ≥ 4). */
+export type FarRelation = { kind: "ancestor" | "descendant"; depth: number; female: boolean };
+export type RelationLabel = RelationKey | FarRelation;
 
 const SIBLING_KEYS: RelationKey[] = ["brother", "sister"];
 const CHILD_KEYS: RelationKey[] = ["son", "daughter"];
@@ -165,7 +176,7 @@ export function relationLabel(
   rels: RelDTO[],
   rootId: string | null,
   targetId: string,
-): RelationKey | null {
+): RelationLabel | null {
   if (!rootId) return null;
   if (targetId === rootId) return "you";
   const target = persons.find((p) => p.id === targetId);
@@ -176,6 +187,9 @@ export function relationLabel(
 
   const blood = bloodLabel(rels, rootId, targetId, female);
   if (blood) return blood;
+  const dist = bloodDistance(rels, rootId, targetId);
+  if (dist && dist[1] === 0 && dist[0] >= 4) return { kind: "ancestor", depth: dist[0], female };
+  if (dist && dist[0] === 0 && dist[1] >= 4) return { kind: "descendant", depth: dist[1], female };
 
   // Alliances courantes : conjoint d'un parent de sang, ou famille du conjoint.
   const targetSpouse = spouseOf(rels, targetId);

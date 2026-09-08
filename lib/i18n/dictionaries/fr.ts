@@ -127,6 +127,12 @@ export const fr: Dictionary = {
       fatherInLaw: "Votre beau-père",
       familyMember: "Membre de la famille",
     },
+    farRelation: (kind, depth, female) => {
+      const pre = "arrière-".repeat(depth - 2);
+      return kind === "ancestor"
+        ? `Votre ${pre}grand-${female ? "mère" : "père"}`
+        : `Votre ${pre}${female ? "petite-fille" : "petit-fils"}`;
+    },
   },
   addMember: {
     title: "Ajouter un membre",
@@ -146,6 +152,8 @@ export const fr: Dictionary = {
     relationSpouse: "Conjoint·e de…",
     relativeTo: "Par rapport à",
     bothParentsLabel: (spouseName) => `Aussi enfant de ${spouseName} (couple)`,
+    marryOtherParentLabel: (parentName) => `Conjoint·e de ${parentName} (l'enfant aura ses deux parents)`,
+    linkChildrenLabel: (childrenNames) => `Aussi parent de : ${childrenNames}`,
     spouseHint:
       "Pour « Enfant de… », vous pouvez choisir le couple (les deux parents) ou un seul parent.",
     propose: "Proposer",

@@ -4,7 +4,7 @@
 // approuvée, et l'approbation d'une demande d'adhésion avec création de carte.
 
 import { prisma } from "./prisma";
-import { spouseOf, type RelDTO } from "./family";
+import { childrenOf, parentsOf, spouseOf, type RelDTO } from "./family";
 import type { Dictionary } from "./i18n/dictionary";
 import { MAX_NICKNAME_LENGTH } from "./limits";
 
@@ -25,6 +25,12 @@ export type AddMemberInput = {
   /** CHILD_OF seulement : si l'ancre a un·e conjoint·e, l'ajouter aussi comme
    *  parent (couple) ou non (ancre seule). Sans effet sinon. */
   bothParents: boolean;
+  /** PARENT_OF : marier le nouveau parent au parent déjà connu de l'ancre
+   *  (s'il est seul et sans conjoint·e), pour que l'enfant ait ses deux parents unis. */
+  marryOtherParent: boolean;
+  /** SPOUSE_OF : rattacher le nouveau conjoint comme parent des enfants
+   *  existants de l'ancre qui n'ont pas encore deux parents. */
+  linkChildren: boolean;
 };
 
 export function parseAddMemberForm(
@@ -72,6 +78,8 @@ export function parseAddMemberForm(
       photoUrl: null,
       relType,
       bothParents: formData.get("bothParents") === "yes",
+      marryOtherParent: formData.get("marryOtherParent") === "yes",
+      linkChildren: formData.get("linkChildren") === "yes",
     } as AddMemberInput,
   };
 }
@@ -135,10 +143,21 @@ export async function applyAddMember(
       await tx.relationship.create({
         data: { treeId: input.treeId, type: "SPOUSE", fromId: input.anchorId, toId: created.id },
       });
+      if (input.linkChildren)
+        for (const childId of childrenOf(rels, input.anchorId))
+          if (parentsOf(rels, childId).length < 2)
+            await tx.relationship.create({
+              data: { treeId: input.treeId, type: "PARENT", fromId: created.id, toId: childId },
+            });
     } else if (input.relType === "PARENT_OF") {
       await tx.relationship.create({
         data: { treeId: input.treeId, type: "PARENT", fromId: created.id, toId: input.anchorId },
       });
+      const others = parentsOf(rels, input.anchorId);
+      if (input.marryOtherParent && others.length === 1 && !spouseOf(rels, others[0]))
+        await tx.relationship.create({
+          data: { treeId: input.treeId, type: "SPOUSE", fromId: others[0], toId: created.id },
+        });
     } else {
       await tx.relationship.create({
         data: { treeId: input.treeId, type: "PARENT", fromId: input.anchorId, toId: created.id },

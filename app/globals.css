@@ -603,7 +603,11 @@ body {
 }
 
 .person {
-  width: 104px;
+  /* Largeur pilotée par le nom : un nom malgache long et sans espace
+     élargit la carte au lieu de déborder sur la voisine. */
+  width: auto;
+  min-width: 104px;
+  max-width: 150px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -683,17 +687,29 @@ body {
   font-weight: 600;
   font-size: 13.5px;
   line-height: 1.25;
+  max-width: 100%;
+  overflow-wrap: anywhere; /* dernier recours au-delà de max-width */
+}
+.pname.name-l {
+  font-size: 12px;
+}
+.pname.name-xl {
+  font-size: 11px;
+  letter-spacing: -0.01em;
 }
 .pyear,
 .pdeath {
   font-size: 11.5px;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
+  max-width: 104px; /* ne pilote pas la largeur de la carte */
 }
 .pnickname {
   font-size: 11.5px;
   color: var(--muted);
   font-style: italic;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 .you-chip {
   display: inline-block;
@@ -740,10 +756,21 @@ body {
   width: 72px;
   height: 72px;
 }
+.panel-head > div {
+  min-width: 0;
+  flex: 1;
+}
 .panel-name {
   font-size: 22px;
   line-height: 1.15;
   margin: 0;
+  overflow-wrap: anywhere;
+}
+.panel-name.name-l {
+  font-size: 19px;
+}
+.panel-name.name-xl {
+  font-size: 17px;
 }
 .panel-nickname {
   font-size: 13px;
@@ -866,6 +893,7 @@ body {
 }
 .queue-title {
   font-weight: 600;
+  overflow-wrap: anywhere;
 }
 .queue-meta {
   font-size: 12.5px;
@@ -976,7 +1004,18 @@ body {
     margin-top: 64px;
   }
   .person {
-    width: 92px;
+    min-width: 92px;
+  }
+  .pname.name-l {
+    font-size: 11px;
+  }
+  .pname.name-xl {
+    font-size: 10.5px;
+    letter-spacing: -0.02em;
+  }
+  .pyear,
+  .pdeath {
+    max-width: 92px;
   }
   .overlay {
     padding: 10px;

@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { submitAddMember, type SubmitState } from "@/app/actions/proposals";
-import { spouseOf, type PersonDTO, type RelDTO } from "@/lib/family";
+import { childrenOf, parentsOf, spouseOf, type PersonDTO, type RelDTO } from "@/lib/family";
 import { imageFileFromPaste, readClipboardImage } from "@/lib/clipboard-image";
 import { MAX_NICKNAME_LENGTH } from "@/lib/limits";
 import { useI18n } from "./I18nProvider";
@@ -32,8 +32,20 @@ export default function AddMemberDialog({
   const [deceased, setDeceased] = useState(false);
   const [pasteError, setPasteError] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
+  const byId = new Map(persons.map((p) => [p.id, p]));
   const anchorSpouseId = spouseOf(rels, anchorId);
-  const anchorSpouse = anchorSpouseId ? persons.find((p) => p.id === anchorSpouseId) : undefined;
+  const anchorSpouse = anchorSpouseId ? byId.get(anchorSpouseId) : undefined;
+  // « Parent de… » : l'ancre a déjà un parent seul → proposer de les marier.
+  const anchorParents = parentsOf(rels, anchorId);
+  const soleParent =
+    anchorParents.length === 1 && !spouseOf(rels, anchorParents[0])
+      ? byId.get(anchorParents[0])
+      : undefined;
+  // « Conjoint·e de… » : enfants de l'ancre sans second parent → proposer le rattachement.
+  const linkableChildren = childrenOf(rels, anchorId)
+    .filter((c) => parentsOf(rels, c).length < 2)
+    .map((c) => byId.get(c))
+    .filter((p): p is PersonDTO => p !== undefined);
 
   useEffect(() => {
     // Ajout appliqué directement (admin) : rafraîchir l'arbre et fermer.
@@ -188,6 +200,22 @@ export default function AddMemberDialog({
                 <label>
                   <input type="checkbox" name="bothParents" value="yes" defaultChecked />
                   {t.addMember.bothParentsLabel(anchorSpouse.name)}
+                </label>
+              </div>
+            )}
+            {relType === "PARENT_OF" && soleParent && (
+              <div className="radio-row">
+                <label>
+                  <input type="checkbox" name="marryOtherParent" value="yes" defaultChecked />
+                  {t.addMember.marryOtherParentLabel(soleParent.name)}
+                </label>
+              </div>
+            )}
+            {relType === "SPOUSE_OF" && linkableChildren.length > 0 && (
+              <div className="radio-row">
+                <label>
+                  <input type="checkbox" name="linkChildren" value="yes" defaultChecked />
+                  {t.addMember.linkChildrenLabel(linkableChildren.map((p) => p.name).join(", "))}
                 </label>
               </div>
             )}

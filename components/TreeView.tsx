@@ -28,6 +28,13 @@ type Props = {
   readOnly?: boolean;
 };
 
+/* Noms malgaches : un seul mot peut dépasser 16 lettres. On réduit la taille
+   plutôt que de couper le mot (la coupure reste le dernier recours en CSS). */
+function nameSizeClass(name: string): string {
+  const longest = Math.max(0, ...name.split(/\s+/).map((w) => w.length));
+  return longest > 16 ? " name-xl" : longest > 12 ? " name-l" : "";
+}
+
 function PersonCard({
   person,
   isYou,
@@ -58,7 +65,7 @@ function PersonCard({
           </span>
         )}
       </span>
-      <span className="pname">{person.name}</span>
+      <span className={`pname${nameSizeClass(person.name)}`}>{person.name}</span>
       {person.nickname && <span className="pnickname">« {person.nickname} »</span>}
       {person.birthYear !== null && (
         <span className="pyear">
@@ -256,8 +263,13 @@ export default function TreeView({
     return () => window.removeEventListener("keydown", onKey);
   }, [sheetOpen]);
 
-  const relKey = selected ? relationLabel(persons, rels, youPersonId, selected.id) : null;
-  const relLabel = relKey ? t.tree.relations[relKey] : "";
+  const rel = selected ? relationLabel(persons, rels, youPersonId, selected.id) : null;
+  const relLabel =
+    rel === null
+      ? ""
+      : typeof rel === "string"
+        ? t.tree.relations[rel]
+        : t.tree.farRelation(rel.kind, rel.depth, rel.female);
   const selectedSpouse = selected ? spouseOf(rels, selected.id) : null;
 
   return (
@@ -310,7 +322,9 @@ export default function TreeView({
                 <Avatar person={selected} />
               </span>
               <div>
-                <h2 className="panel-name display">{selected.name}</h2>
+                <h2 className={`panel-name display${nameSizeClass(selected.name)}`}>
+                  {selected.name}
+                </h2>
                 {selected.nickname && (
                   <p className="panel-nickname">« {selected.nickname} »</p>
                 )}

@@ -134,6 +134,8 @@ export type Dictionary = {
       email: string;
     };
     relations: Record<RelationKey, string>;
+    /** Ancêtre/descendant direct au-delà de la table (profondeur ≥ 4 : arrière-arrière-…). */
+    farRelation: (kind: "ancestor" | "descendant", depth: number, female: boolean) => string;
   };
   addMember: {
     title: string;
@@ -153,6 +155,8 @@ export type Dictionary = {
     relationSpouse: string;
     relativeTo: string;
     bothParentsLabel: (spouseName: string) => string;
+    marryOtherParentLabel: (parentName: string) => string;
+    linkChildrenLabel: (childrenNames: string) => string;
     spouseHint: string;
     propose: string;
     add: string;
