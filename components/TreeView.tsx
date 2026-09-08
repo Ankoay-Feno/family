@@ -134,10 +134,12 @@ export default function TreeView({
   const forest = buildForest(persons, rels);
   const [selectedId, setSelectedId] = useState<string | null>(youPersonId);
   const [dialogOpen, setDialogOpen] = useState(false);
+  // Écrans étroits (une colonne) : la fiche s'ouvre en feuille par-dessus
+  // l'arbre au lieu d'être en bas de page, pour ne pas perdre sa position.
+  const [sheetOpen, setSheetOpen] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
   const wiresRef = useRef<SVGSVGElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLElement>(null);
 
   const selected = persons.find((p) => p.id === selectedId) ?? null;
   const family = selectedId ? directFamily(rels, selectedId) : null;
@@ -238,14 +240,21 @@ export default function TreeView({
     }
   }, [youPersonId]);
 
-  // En une colonne (tablette/mobile), le panneau est sous l'arbre : on l'amène
-  // à l'écran quand on touche une carte, sinon la sélection semble sans effet.
   const select = useCallback((id: string) => {
     setSelectedId(id);
-    if (window.matchMedia("(max-width: 980px)").matches) {
-      panelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    if (window.matchMedia("(max-width: 980px)").matches) setSheetOpen(true);
   }, []);
+
+  useEffect(() => {
+    if (!sheetOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      // Un dialogue ouvert dans la fiche (invitation, choix de photo) a priorité.
+      if (e.key !== "Escape" || document.querySelector(".overlay, .photo-menu-overlay")) return;
+      setSheetOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [sheetOpen]);
 
   const relKey = selected ? relationLabel(persons, rels, youPersonId, selected.id) : null;
   const relLabel = relKey ? t.tree.relations[relKey] : "";
@@ -278,7 +287,16 @@ export default function TreeView({
         </div>
       </div>
 
-      <aside className="panel" aria-live="polite" ref={panelRef}>
+      {sheetOpen && <div className="sheet-backdrop" onClick={() => setSheetOpen(false)} />}
+      <aside className={`panel${sheetOpen ? " sheet-open" : ""}`} aria-live="polite">
+        {sheetOpen && (
+          <div className="sheet-head">
+            <span className="sheet-handle" aria-hidden="true" />
+            <button type="button" className="btn-link panel-close" onClick={() => setSheetOpen(false)}>
+              {t.common.close}
+            </button>
+          </div>
+        )}
         {selected ? (
           <>
             {selected.coverUrl && (
