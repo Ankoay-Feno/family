@@ -1,0 +1,18 @@
+# Blueprint du cron_job qui garde la db active.
+# Le service web Next.js pourra être ajouté ici plus tard.
+services:
+  - type: cron
+    name: db-ping
+    runtime: docker
+    region: singapore
+    plan: starter
+    # Tous les jours à 06:00 UTC (mise en pause après 7 jours d'inactivité).
+    schedule: "0 6 * * *"
+    dockerfilePath: ./cron_job/Dockerfile
+    dockerContext: ./cron_job
+    envVars:
+      # sync: false → valeurs saisies dans le dashboard, jamais dans le repo.
+      - key: DB_URL
+        sync: false
+      - key: DB_API_KEY
+        sync: false

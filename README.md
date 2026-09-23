@@ -93,6 +93,17 @@ voir l'artifact « Spécification Fianakaviana ».
   changement, l'ancienne est supprimée du stockage. Édition depuis la fiche
   (admin famille, ou propriétaire de sa carte).
 
+## cron_job — ping de la db (anti mise en pause)
+
+Les instances de db gratuites sont suspendues après 7 jours sans requête.
+`cron_job/` contient un Dockerfile minimal (`curlimages/curl`) qui appelle
+`POST /rest/v1/rpc/ping` avec la clé publique de l'API ; le blueprint à la
+racine le déclare comme cron job quotidien (06:00 UTC). À faire une fois :
+
+1. exécuter `cron_job/ping.sql` sur la db ;
+2. créer le cron job (runtime Docker) et renseigner `DB_URL` et `DB_API_KEY`
+   dans ses variables d'environnement.
+
 ## Prochaines étapes
 
 - V1.3 — publications, commentaires, réactions par arbre ; fiche personne enrichie ;
