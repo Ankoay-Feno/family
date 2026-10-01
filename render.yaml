@@ -1,18 +1,23 @@
-# Blueprint du cron_job qui garde la db active.
+# Blueprint du web service (plan gratuit) qui garde la db active, lui-même en marche,
+# et peut réveiller plusieurs URLs Render gratuites.
 # Le service web Next.js pourra être ajouté ici plus tard.
 services:
-  - type: cron
+  - type: web
     name: db-ping
     runtime: docker
+    # Région la plus proche de la db (ap-south-1) : pas de région Inde disponible.
     region: singapore
-    plan: starter
-    # Tous les jours à 06:00 UTC (mise en pause après 7 jours d'inactivité).
-    schedule: "0 6 * * *"
+    plan: free
     dockerfilePath: ./cron_job/Dockerfile
     dockerContext: ./cron_job
+    healthCheckPath: /health
     envVars:
       # sync: false → valeurs saisies dans le dashboard, jamais dans le repo.
       - key: DB_URL
         sync: false
       - key: DB_API_KEY
+        sync: false
+      # Liste d'URLs HTTPS à appeler périodiquement. Séparateurs : virgule, espace ou retour ligne.
+      # Mets au minimum l'URL publique de ce service + /health, puis les autres URLs à réveiller.
+      - key: PING_URLS
         sync: false

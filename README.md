@@ -95,14 +95,44 @@ voir l'artifact « Spécification Fianakaviana ».
 
 ## cron_job — ping de la db (anti mise en pause)
 
-Les instances de db gratuites sont suspendues après 7 jours sans requête.
-`cron_job/` contient un Dockerfile minimal (`curlimages/curl`) qui appelle
-`POST /rest/v1/rpc/ping` avec la clé publique de l'API ; le blueprint à la
-racine le déclare comme cron job quotidien (06:00 UTC). À faire une fois :
+Les instances de db gratuites sont suspendues après 7 jours sans requête, et un
+web service gratuit est mis en veille après 15 min sans trafic entrant.
+`cron_job/` contient un petit web service Docker (`alpine` + `busybox httpd` +
+`curl`) qui sert `/health` et fait tourner une boucle interne :
 
-1. exécuter `cron_job/ping.sql` sur la db ;
-2. créer le cron job (runtime Docker) et renseigner `DB_URL` et `DB_API_KEY`
-   dans ses variables d'environnement.
+- toutes les 6 h (`DB_PING_INTERVAL`) : `POST /rest/v1/rpc/ping` sur la db avec la
+  clé publique de l'API ;
+- toutes les 10 min (`URL_PING_INTERVAL`) : `GET` sur chaque URL de `PING_URLS`
+  pour garder éveillés ce service et, si besoin, d'autres services Render gratuits.
+
+`PING_URLS` accepte plus de deux liens : sépare-les par virgule, espace ou retour
+ligne. Mets au minimum l'URL publique HTTPS de ce service + `/health`, par exemple
+`https://db-ping.onrender.com/health`, puis les autres URLs à réveiller.
+
+Le blueprint à la racine le déclare en plan gratuit. À faire une fois :
+
+1. exécuter `cron_job/ping.sql` sur Supabase ;
+2. créer le web service Render (runtime Docker, health check `/health`) et renseigner
+   `DB_URL`, `DB_API_KEY` et `PING_URLS` dans ses variables d'environnement.
+
+Exemple de variables :
+
+```env
+DB_URL=https://TON-PROJET.supabase.co
+DB_API_KEY=TA_CLE_PUBLIQUE
+PING_URLS=https://db-ping.onrender.com/health,https://autre-service.onrender.com/health,https://site-3.onrender.com/
+```
+
+Le test manuel équivalent au ping Supabase est :
+
+```bash
+curl --fail --silent --show-error \
+  -X POST "https://TON-PROJET.supabase.co/rest/v1/rpc/ping" \
+  -H "apikey: TA_CLE_PUBLIQUE"
+```
+
+Limite : ~750 h gratuites par mois et par espace de travail ; ce service toujours
+actif en consomme ~730, un second service gratuit permanent dépasserait le quota.
 
 ## Prochaines étapes
 
